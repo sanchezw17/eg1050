@@ -24,8 +24,12 @@ class Rocket(Base_Rectangle):
         self.x = launchsite.x+launchsite.width*.5-self.width*.5
         self.y = launchsite.y-self.height
         self.dt = dt
-
-
+        
+        #TESING INITIAL MASS, THRUST & ANGLE
+        self.mass = 100                 #EXAMPLE mass of rocket (kg)
+        self.thrust = 1000              #EXAMPLE initial thrust (N)
+        self.angle = math.radians(90)   #EXAMPLE initial angle of rocket (rad)
+        self.velocity = [0,0]
 
     def draw(self):
         
@@ -51,6 +55,31 @@ class Rocket(Base_Rectangle):
         
 
     def update(self,environment=None):
+
+        #EXAMPLE Calculate the magnitude of thrust components
+        thrust_x = self.thrust * np.cos(self.angle)
+        thrust_y = self.thrust * np.sin(self.angle)
+
+        #EXAMPLE Calculate force
+        force_x = thrust_x
+        force_y = thrust_y - (self.mass * environment.gravity)
+        force = np.array([force_x, force_y])
+
+        #Use physics_engine to calculate acceleration with force and mass
+        acceleration = physics_engine.calculate_acceleration(force,self.mass)
+
+        #Update velocity 
+        # a = dv/dt
+        # a * dt = vf - vi
+        # vf = vi + (a * dt) 
+        self.velocity += acceleration * self.dt
+
+        # v = ds/dt
+        # v * dt = sf - si
+        # sf = si + (v * dt) 
+        self.x += self.velocity[0] * self.dt
+        self.y += self.velocity[1] * self.dt
+       
         #this will update forces and stuff 
         pass
 
