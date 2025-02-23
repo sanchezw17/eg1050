@@ -72,7 +72,7 @@ class Rocket(Base_Rectangle):
         # a = dv/dt
         # a * dt = vf - vi
         # vf = vi + (a * dt) 
-        self.velocity += acceleration * self.dt
+        self.velocity += [(acceleration[0] * self.dt),(acceleration[1] * self.dt)]
 
         # v = ds/dt
         # v * dt = sf - si
