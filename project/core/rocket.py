@@ -26,9 +26,9 @@ class Rocket(Base_Rectangle):
         self.dt = dt
         
         #TESING INITIAL MASS, THRUST & ANGLE
-        self.mass = 100                 #EXAMPLE mass of rocket (kg)
-        self.thrust = 1000              #EXAMPLE initial thrust (N)
-        self.angle = math.radians(90)   #EXAMPLE initial angle of rocket (rad)
+        self.mass = 10                  #EXAMPLE mass of rocket (kg)
+        self.thrust = 200              #EXAMPLE initial thrust (N)
+        self.angle = np.radians(270)     #EXAMPLE initial angle of rocket (rad)
         self.velocity = [0,0]
 
     def draw(self):
@@ -41,17 +41,14 @@ class Rocket(Base_Rectangle):
         pg.draw.rect(self.screen,"red",(self.x,self.y,self.width,self.height))
         self.screen.blit(image, image_rect)
 
-    
     def erase(self):
-        #handled elsewhere
         pass
-        
 
     def compute_altitude(self):
-        pass
+        return max(0, self.launchsite.y - self.y)
 
     def check_collision(self,other,environment):
-       pass
+        pass
         
 
     def update(self,environment=None):
@@ -72,16 +69,16 @@ class Rocket(Base_Rectangle):
         # a = dv/dt
         # a * dt = vf - vi
         # vf = vi + (a * dt) 
-        self.velocity += [(acceleration[0] * self.dt),(acceleration[1] * self.dt)]
-
+        self.velocity = np.array(self.velocity) + (np.array(acceleration) * self.dt)
+        
         # v = ds/dt
         # v * dt = sf - si
         # sf = si + (v * dt) 
         self.x += self.velocity[0] * self.dt
         self.y += self.velocity[1] * self.dt
-       
+        print(f"Thrust: {thrust_y} Force: {force_y} Velocity: {self.velocity}, Position: ({self.x}, {self.y})")
         #this will update forces and stuff 
-        pass
+
 
 
  
