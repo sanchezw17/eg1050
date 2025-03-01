@@ -5,6 +5,7 @@ import settings
 import core 
 from core import environment
 from core.rocket import Rocket
+import pygame
 
 
 def is_complete():
@@ -45,10 +46,21 @@ def main():
             
             if event.type == pg.KEYDOWN:
                 keys = pg.key.get_pressed()
-                #THIS IS A TEMPLATE FOR HANDLING KEYBOARD INPUT
+                if event.key == pg.K_SPACE: # If 'space' is pressed
+                    rocket.is_thrusting = True # Call the launch function
+                if event.type == pg.KEYDOWN:
+                    event.keys = pg.key.get_pressed()
+                if event.keys[pygame.K_w]:
+                    rocket.thrust += 1000
+                if event.keys[pygame.K_s]:
+                    rocket.thrust -= 10
+                if event.keys[pygame.K_a]:
+                    rocket.angle += 2
+                if event.keys[pygame.K_d]:
+                    rocket.angle -= 2
+            
 
-                #if keys[pg.K_<SOME INPUT DIRECTLY AFTER K_>]:
-                   # THEN DO SOMETHING OR CALL SOMETHING
+                          
         
         #in games you should draw/delete the objects in the environment each frame elsewise shapes bleed together for moving objects
         env.draw_objects()

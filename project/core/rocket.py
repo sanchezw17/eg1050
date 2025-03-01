@@ -27,9 +27,11 @@ class Rocket(Base_Rectangle):
         
         #TESING INITIAL MASS, THRUST & ANGLE
         self.mass = 10                      #EXAMPLE mass of rocket (kg)
-        self.thrust = 200                   #EXAMPLE initial thrust (N)
+        self.thrust = 0                   #EXAMPLE initial thrust (N)
         self.angle = np.radians(90)         #EXAMPLE initial angle of rocket (rad)
         self.velocity = [0,0]
+
+        self.is_thrusting = False  # Tracks whether thrust is active
 
     def draw(self):
         
@@ -65,19 +67,28 @@ class Rocket(Base_Rectangle):
         #Use physics_engine to calculate acceleration with force and mass
         acceleration = physics_engine.calculate_acceleration(force,self.mass)
 
-        #Update velocity 
-        # a = dv/dt
-        # a * dt = vf - vi
-        # vf = vi + (a * dt) 
-        self.velocity = np.array(self.velocity) + (np.array(acceleration) * self.dt)
-        
-        # v = ds/dt
-        # v * dt = sf - si
-        # sf = si + (v * dt) 
+        if self.is_thrusting: # Apply thrust when 'space' is pressed
+            # Apply thrust force
+            self.thrust_x = self.thrust * np.cos(self.angle)
+            self.thrust_y = self.thrust * np.sin(self.angle)
+
+            self.force_x = self.thrust_x
+            self.force_y = self.thrust_y + (self.mass * environment.gravity)
+
+            self.force = np.array([self.force_x, self.force_y])
+            self.acceleration = physics_engine.calculate_acceleration(self.force, self.mass)
+
+            self.launch()
+
+    def launch(self):
+
+        # Update Velocity 
+        self.velocity = np.array(self.velocity) +(np.array(self.acceleration) * self.dt)
+
+        # Update position
         self.x += self.velocity[0] * self.dt
         self.y -= self.velocity[1] * self.dt        #inverted for pygame coordinates (0,0) at the top left
-        print(f"Thrust: {thrust_y} Force: {force_y} Velocity: {self.velocity}, Position: ({self.x}, {self.y})")
-        #this will update forces and stuff 
+        
 
 
 
