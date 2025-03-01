@@ -9,7 +9,7 @@ import math
     
 class Rocket(Base_Rectangle):
     def __init__(self,screen,launchsite,result = None,object_type = "rocket",dt=None,x=None,y=None,width=40,height=80):
-        self.original_image = pg.image.load('linked_files/rocket-147466_960_720.png')
+        self.original_image = pg.image.load('linked_files/BrayBray..PNG')
         self.original_image = pg.transform.scale(self.original_image, (50, 100))
         self.image = self.original_image.copy()
         self.image = pg.transform.rotate(self.image, 0)#self.tilt)
