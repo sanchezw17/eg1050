@@ -49,9 +49,34 @@ class Rocket(Base_Rectangle):
     def compute_altitude(self):
         return max(0, self.launchsite.y - self.y)
 
-    def check_collision(self,other,environment):
-        pass
-        
+    def check_collision(self, other, environment):
+        if self.y + self.height > self.screen.get_height():
+            self.y = self.screen.get_height() - self.height
+            self.velocity[1] = 0
+            self.result = "Crash"
+            print("Collision: Rocket has hit the ground")
+        elif self.check_collision_with_terrain(environment):
+            self.result = "Crash"
+            print("Collision: Rocket has hit the terrain")
+
+    def check_collision_with_terrain(self, environment):
+        points = environment.points_full.T.tolist()
+        if self.x - self.width / 2 - 25 < 0:
+            low = 0
+        else:
+            low = int(self.x - self.width / 2 - 25)
+        if self.x + self.width / 2 + 25 > self.screen.get_width():
+            high = self.screen.get_width()
+        else:
+            high = int(self.x + self.width / 2 + 25)
+        for i in range(low, high):
+            p1 = points[i]
+            p2 = points[(i + 1) % len(points)]
+
+            if physics_engine.line_circle_collision(self.x, self.y, self.width / 2, p1, p2):
+                return True  # Return True if collision occurs
+
+        return False  # Return False if no collision
 
     def update(self,environment=None):
 
@@ -88,8 +113,7 @@ class Rocket(Base_Rectangle):
         # Update position
         self.x += self.velocity[0] * self.dt
         self.y -= self.velocity[1] * self.dt        #inverted for pygame coordinates (0,0) at the top left
-        
 
 
 
- 
+
