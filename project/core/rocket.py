@@ -81,6 +81,18 @@ class Rocket(Base_Rectangle):
             self.acceleration = physics_engine.calculate_acceleration(self.force, self.mass)
 
             self.launch()  # Apply physics to move the rocket
+        else:
+            self.thrust_x = self.thrust * np.cos(self.angle)
+            self.thrust_y = self.thrust * np.sin(self.angle)
+
+            self.force_x = self.thrust_x
+            self.force_y = self.thrust_y - (self.mass * environment.gravity)  # Gravity included
+
+            self.force = np.array([self.force_x, self.force_y])
+            self.acceleration = physics_engine.calculate_acceleration(self.force, self.mass)
+            self.fall()
+        
+
 
     def launch(self):
         
@@ -91,6 +103,15 @@ class Rocket(Base_Rectangle):
         self.x += self.velocity[0] * self.dt
         self.y -= self.velocity[1] * self.dt  # Inverted for pygame coordinates
 
-        print(f"Thrust: {self.thrust_y}, Force: {self.force_y}, Velocity: {self.velocity}, Position: ({self.x}, {self.y})")
+
+    def fall(self):
+        
+        # Update velocity
+        self.velocity = np.array(self.velocity) - (np.array(self.acceleration) * self.dt)
+
+        # Update position
+        self.x += self.velocity[0] * self.dt
+        self.y += self.velocity[1] * self.dt  # Inverted for pygame coordinates
+        
 
         
