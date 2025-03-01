@@ -45,16 +45,19 @@ def main():
                 running = False
             
             if event.type == pg.KEYDOWN:
-                event.keys = pg.key.get_pressed()
+                keys = pg.key.get_pressed()
+                if event.key == pg.K_SPACE: # If 'space' is pressed
+                    rocket.is_thrusting = True # Call the launch function
+                if event.type == pg.KEYDOWN:
+                    event.keys = pg.key.get_pressed()
                 if event.keys[pygame.K_w]:
                     rocket.thrust += 1000
                 if event.keys[pygame.K_s]:
-                   rocket.thrust -= 1000
+                    rocket.thrust -= 10
                 if event.keys[pygame.K_a]:
                     rocket.angle += 2
                 if event.keys[pygame.K_d]:
                     rocket.angle -= 2
-            
             
 
                           
