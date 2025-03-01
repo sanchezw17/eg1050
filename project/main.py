@@ -5,6 +5,7 @@ import settings
 import core 
 from core import environment
 from core.rocket import Rocket
+import pygame
 
 
 def is_complete():
