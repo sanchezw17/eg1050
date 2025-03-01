@@ -61,7 +61,6 @@ def main():
             
 
                           
-        
         #in games you should draw/delete the objects in the environment each frame elsewise shapes bleed together for moving objects
         env.draw_objects()
         rocket.draw()

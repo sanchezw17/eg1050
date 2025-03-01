@@ -21,6 +21,11 @@ class Environment():
 
         self.set_end(self.points_last)
 
+        # Load the sunshine image
+        self.sunshine_image = pg.image.load("linked_files/sunshine.png")  # Make sure the file exists
+        self.sunshine_image = pg.transform.scale(self.sunshine_image, (200, 200))  # Resize if needed
+
+
     def set_end(self,points):
 
         init = Landingpad(self.screen,x=None,y=None)
@@ -77,7 +82,12 @@ class Environment():
         points.append([0,self.screen.get_height()])
         for ii in range(len(points)-1):
             pg.draw.polygon(screen,(95, 72, 59),points)
-        
+    
+    def draw_sunshine(self):
+        # Draws the moon image in the top-right corner of the screen
+        screen_width = self.screen.get_width()
+        self.screen.blit(self.sunshine_image, (screen_width - 220, 20))  # 10px margin from top-right
+
     def draw_objects(self):
         for obj in self.objects:
             obj.draw()
@@ -85,9 +95,10 @@ class Environment():
         self.start.draw()
         self.end.draw()
 
+        self.draw_sunshine()
+
     def erase_objects(self):
         pg.draw.polygon(self.screen,"black",self.points_full.T.tolist())
-        
         
     def generate_terrain(self,screen,max_height,segments=10):
         x_coord = list(range(0,screen.get_width()))
