@@ -24,8 +24,12 @@ class Rocket(Base_Rectangle):
         self.x = launchsite.x+launchsite.width*.5-self.width*.5
         self.y = launchsite.y-self.height
         self.dt = dt
-
-
+        
+        #TESING INITIAL MASS, THRUST & ANGLE
+        self.mass = 10                      #EXAMPLE mass of rocket (kg)
+        self.thrust = 200                   #EXAMPLE initial thrust (N)
+        self.angle = np.radians(90)         #EXAMPLE initial angle of rocket (rad)
+        self.velocity = [0,0]
 
     def draw(self):
         
@@ -37,22 +41,44 @@ class Rocket(Base_Rectangle):
         pg.draw.rect(self.screen,"red",(self.x,self.y,self.width,self.height))
         self.screen.blit(image, image_rect)
 
-    
     def erase(self):
-        #handled elsewhere
         pass
-        
 
     def compute_altitude(self):
-        pass
+        return max(0, self.launchsite.y - self.y)
 
     def check_collision(self,other,environment):
-       pass
+        pass
         
 
     def update(self,environment=None):
+
+        #EXAMPLE Calculate the magnitude of thrust components
+        thrust_x = self.thrust * np.cos(self.angle)
+        thrust_y = self.thrust * np.sin(self.angle)
+
+        #EXAMPLE Calculate force
+        force_x = thrust_x
+        force_y = thrust_y + (self.mass * environment.gravity) #inverted for pygame coordinates (0,0) at the top left
+        force = np.array([force_x, force_y])
+
+        #Use physics_engine to calculate acceleration with force and mass
+        acceleration = physics_engine.calculate_acceleration(force,self.mass)
+
+        #Update velocity 
+        # a = dv/dt
+        # a * dt = vf - vi
+        # vf = vi + (a * dt) 
+        self.velocity = np.array(self.velocity) + (np.array(acceleration) * self.dt)
+        
+        # v = ds/dt
+        # v * dt = sf - si
+        # sf = si + (v * dt) 
+        self.x += self.velocity[0] * self.dt
+        self.y -= self.velocity[1] * self.dt        #inverted for pygame coordinates (0,0) at the top left
+        print(f"Thrust: {thrust_y} Force: {force_y} Velocity: {self.velocity}, Position: ({self.x}, {self.y})")
         #this will update forces and stuff 
-        pass
+
 
 
  
