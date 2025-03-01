@@ -27,7 +27,7 @@ class Rocket(Base_Rectangle):
         
         #TESING INITIAL MASS, THRUST & ANGLE
         self.mass = 10                      #EXAMPLE mass of rocket (kg)
-        self.thrust = 200                   #EXAMPLE initial thrust (N)
+        self.thrust = 0                   #EXAMPLE initial thrust (N)
         self.angle = np.radians(90)         #EXAMPLE initial angle of rocket (rad)
         self.velocity = [0,0]
 
