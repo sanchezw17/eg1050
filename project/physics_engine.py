@@ -10,13 +10,7 @@ def calculate_gravity(object,environment):
     pass
 
 def calculate_acceleration(force,mass):
-    """
-    Calculate acceleration
-    :param force: force[0] "fx", force[1] "fy" from resulting force
-    :param mass: mass of the rocket
-    :return: acceleration of the rocket (ax, ay)
-    """
-    return (force[0]/mass, force[1]/mass)
+    pass
 
 def calculate_collision_force(object1,object2):
     pass
