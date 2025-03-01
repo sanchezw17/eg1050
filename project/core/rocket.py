@@ -31,6 +31,10 @@ class Rocket(Base_Rectangle):
         self.angle = np.radians(90)         #EXAMPLE initial angle of rocket (rad)
         self.velocity = [0,0]
 
+        # Add this line to define is_thrusting
+        self.is_thrusting = False  # Tracks whether thrust is active
+
+
     def draw(self):
         
         image = self.original_image
@@ -50,35 +54,64 @@ class Rocket(Base_Rectangle):
     def check_collision(self,other,environment):
         pass
         
+    
 
-    def update(self,environment=None):
+    def update(self, environment=None):
+    
+        # Calculate the magnitude of thrust components
+        self.thrust_x = self.thrust * np.cos(self.angle)
+        self.thrust_y = self.thrust * np.sin(self.angle)
 
-        #EXAMPLE Calculate the magnitude of thrust components
-        thrust_x = self.thrust * np.cos(self.angle)
-        thrust_y = self.thrust * np.sin(self.angle)
+        # Calculate force
+        self.force_x = self.thrust_x
+        self.force_y = self.thrust_y + (self.mass * environment.gravity)  # Inverted for pygame coordinates
+        self.force = np.array([self.force_x, self.force_y])
 
-        #EXAMPLE Calculate force
-        force_x = thrust_x
-        force_y = thrust_y + (self.mass * environment.gravity) #inverted for pygame coordinates (0,0) at the top left
-        force = np.array([force_x, force_y])
+        # Use physics_engine to calculate acceleration
+        self.acceleration = physics_engine.calculate_acceleration(self.force, self.mass)
 
-        #Use physics_engine to calculate acceleration with force and mass
-        acceleration = physics_engine.calculate_acceleration(force,self.mass)
+        if self.is_thrusting:  # Apply thrust only when 'W' is pressed
+            self.thrust_x = self.thrust * np.cos(self.angle)
+            self.thrust_y = self.thrust * np.sin(self.angle)
 
-        #Update velocity 
-        # a = dv/dt
-        # a * dt = vf - vi
-        # vf = vi + (a * dt) 
-        self.velocity = np.array(self.velocity) + (np.array(acceleration) * self.dt)
+            self.force_x = self.thrust_x
+            self.force_y = self.thrust_y + (self.mass * environment.gravity)  # Gravity included
+
+            self.force = np.array([self.force_x, self.force_y])
+            self.acceleration = physics_engine.calculate_acceleration(self.force, self.mass)
+
+            self.launch()  # Apply physics to move the rocket
+        else:
+            self.thrust_x = self.thrust * np.cos(self.angle)
+            self.thrust_y = self.thrust * np.sin(self.angle)
+
+            self.force_x = self.thrust_x
+            self.force_y = self.thrust_y - (self.mass * environment.gravity)  # Gravity included
+
+            self.force = np.array([self.force_x, self.force_y])
+            self.acceleration = physics_engine.calculate_acceleration(self.force, self.mass)
+            self.fall()
         
-        # v = ds/dt
-        # v * dt = sf - si
-        # sf = si + (v * dt) 
+
+
+    def launch(self):
+        
+        # Update velocity
+        self.velocity = np.array(self.velocity) + (np.array(self.acceleration) * self.dt)
+
+        # Update position
         self.x += self.velocity[0] * self.dt
-        self.y -= self.velocity[1] * self.dt        #inverted for pygame coordinates (0,0) at the top left
-        print(f"Thrust: {thrust_y} Force: {force_y} Velocity: {self.velocity}, Position: ({self.x}, {self.y})")
-        #this will update forces and stuff 
+        self.y -= self.velocity[1] * self.dt  # Inverted for pygame coordinates
 
 
+    def fall(self):
+        
+        # Update velocity
+        self.velocity = np.array(self.velocity) - (np.array(self.acceleration) * self.dt)
 
- 
+        # Update position
+        self.x += self.velocity[0] * self.dt
+        self.y += self.velocity[1] * self.dt  # Inverted for pygame coordinates
+        
+
+        
