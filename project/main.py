@@ -51,7 +51,7 @@ def main():
                 if event.type == pg.KEYDOWN:
                     event.keys = pg.key.get_pressed()
                 if event.keys[pygame.K_w]:
-                    rocket.thrust += 1000
+                    rocket.thrust += 200
                 if event.keys[pygame.K_s]:
                     rocket.thrust -= 10
                 if event.keys[pygame.K_a]:
@@ -60,25 +60,25 @@ def main():
                     rocket.angle -= 2
             
 
-                          
+        
         
         #in games you should draw/delete the objects in the environment each frame elsewise shapes bleed together for moving objects
         env.draw_objects()
         rocket.draw()
 
+        # Update rocket and check for collisions
         rocket.erase()        
         rocket.dt = dt
     
-    #This is where you would handle the physics of the rocket
-    #Also update rockets
         rocket.check_boundary(env)
-        #[rocket.check_collision(obj) for obj in env.objects]
+        if rocket.check_collision(None, env):
+            running = False  # Stop the game if collision occurs
         rocket.update(env)
     
-    #redraw the rocket
+        #redraw the rocket
         rocket.draw()
 
-    #update screen and dt
+        #update screen and dt
         time_elapsed += dt
         pg.display.flip()
      
