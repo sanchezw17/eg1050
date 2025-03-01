@@ -51,9 +51,9 @@ def main():
                 if event.keys[pygame.K_s]:
                    rocket.thrust -= 1000
                 if event.keys[pygame.K_a]:
-                    rocket.angle -= 10
+                    rocket.angle += 2
                 if event.keys[pygame.K_d]:
-                    rocket.angle += 10
+                    rocket.angle -= 2
             
             
 
