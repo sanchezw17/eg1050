@@ -46,6 +46,11 @@ def main():
             if event.type == pg.KEYDOWN:
                 keys = pg.key.get_pressed()
                 #THIS IS A TEMPLATE FOR HANDLING KEYBOARD INPUT
+                if event.key == pg.K_w:  # If 'W' is pressed
+                    rocket.is_thrusting = True # Call the launch function
+                if event.key == pg.K_s: # If 'S' is pressed
+                    rocket.is_thrusting = False # Make the rocket fall
+                
 
                 #if keys[pg.K_<SOME INPUT DIRECTLY AFTER K_>]:
                    # THEN DO SOMETHING OR CALL SOMETHING
