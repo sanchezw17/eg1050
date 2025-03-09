@@ -86,6 +86,18 @@ class Rocket:
             self.y_pos = HEIGHT - self.height
             self.y_speed = 0
 
+        #Making collision for the random ground does not work currently
+        """""
+    def check_collision_blocks(self, blocks):
+        
+        rocket_rect = pygame.Rect(self.x_pos, self.y_pos, self.width, self.height)
+
+        for block in blocks:
+            if rocket_rect.colliderect(block):
+                self.y_speed = 0
+                self.y_pos = block.top - self.height  # Place rocket on top of the block
+         """  
+        pass
 
     def print_info(self):
         print(f"x_pos:{self.x_pos}, y_pos:{self.y_pos}, x_speed:{self.x_speed}, y_speed: {self.y_speed}, x_acceleration: {self.x_acceleration}, y_acceleration: {self.y_acceleration}, angle: {self.angle}, thrust: {self.thrust}")
@@ -115,13 +127,14 @@ def make_envirement(WIDTH, HEIGHT, seed):
     block_7 = pygame.draw.rect(screen, "green", (600, HEIGHT - seed[5], 100, seed[5]) )
     block_8 = pygame.draw.rect(screen, "green", (700, HEIGHT - seed[6], 100, seed[6]) )
     block_9 = pygame.draw.rect(screen, "green", (800, HEIGHT - seed[7], 100, seed[7] ))
-
+    blocks = [block_start, block_end, block_2, block_3, block_4, block_5, block_6, block_7, block_8, block_9]
     
+    return blocks
 
 
 
 #Make rocket for the game
-rocket1 = Rocket(500, 400, 100, 50, "red", 1, 0, 0, 0, 0, np.pi/2, 0)
+rocket1 = Rocket(50, HEIGHT - 180 , 100, 50, "red", 1, 0, 0, 0, 0, np.pi/2, 0)
 
 #Main Game loup
 run = True
