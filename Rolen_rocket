@@ -134,7 +134,7 @@ def show_explosion():
     duration = 10  # Number of frames the explosion lasts
 
     for i in range(duration):
-        screen.fill("blue")  # Clear the screen (for each frame)
+        screen.blit(background_image, (0, 0))  # Clear the screen (for each frame)
         # Draw other game elements here (rocket, blocks, etc.)
         rocket1.draw()  # Draw rocket
         
@@ -165,6 +165,7 @@ def show_you_died_screen():
     
 	# Load and play the death sound
     death_sound = pygame.mixer.Sound("death_sound.wav")  # Replace with the actual sound file path
+    death_sound.set_volume(1.0)
     death_sound.play()
 	
     pygame.display.flip()  # Update the screen
@@ -187,13 +188,13 @@ def show_you_win_screen():
 def reset_game():
     global rocket1, seed
     seed = np.random.randint(0, 250, 9)  # Generate new terrain
-    rocket1 = Rocket(50, HEIGHT - 180, 100, 50, "red", 1, 0, 0, 0, 0, np.pi/2, 0)  # Reset rocket position
+    rocket1 = Rocket(25, HEIGHT - 180, 100, 50, "red", 1, 0, 0, 0, 0, np.pi/2, 0)  # Reset rocket position
 
 # Make walls
 def draw_walls():
-    left = pygame.draw.line(screen, "green", (0, 0), (0, HEIGHT), 10)
-    right = pygame.draw.line(screen, "green", (WIDTH, 0), (WIDTH, HEIGHT), 10)
-    top = pygame.draw.line(screen, "green", (0, 0), (WIDTH, 0), 10)
+    left = pygame.draw.line(screen, "black", (0, 0), (0, HEIGHT), 10)
+    right = pygame.draw.line(screen, "black", (WIDTH, 0), (WIDTH, HEIGHT), 10)
+    top = pygame.draw.line(screen, "black", (0, 0), (WIDTH, 0), 10)
     bottom = pygame.draw.line(screen, "black", (0, HEIGHT), (WIDTH, HEIGHT), 10)
     walls = [left, right, top, bottom]
     return walls
@@ -201,49 +202,55 @@ def draw_walls():
 # Make procedural environment
 def make_envirement(WIDTH, HEIGHT, seed):
     # Create starting pad
-    pygame.draw.rect(screen, "grey", (0, HEIGHT - 80, 100, 80) )
+    pygame.draw.rect(screen, "darkgrey", (0, HEIGHT - 80, 100, 80) )
     block_start = pygame.Rect(0, HEIGHT - 80, 100, 80)
    
     # Create ending pad
-    pygame.draw.rect(screen, "grey", (WIDTH - 100, HEIGHT - 80, 100, 80) )
+    pygame.draw.rect(screen, "darkgrey", (WIDTH - 100, HEIGHT - 80, 100, 80) )
     block_end = pygame.Rect(WIDTH - 100, HEIGHT - 80, 100, 80)
     
     # Create block for each square, using random game variables
     block_2 = pygame.Rect(100, HEIGHT - seed[0], 100, seed[0])
-    pygame.draw.rect(screen, "green", block_2)
+    pygame.draw.rect(screen, "darkgreen", block_2)
 
     block_3 = pygame.Rect(200, HEIGHT - seed[1], 100, seed[1])
-    pygame.draw.rect(screen, "green", block_3)
+    pygame.draw.rect(screen, "darkgreen", block_3)
     
     block_4 = pygame.Rect(300, HEIGHT - seed[2], 100, seed[2])
-    pygame.draw.rect(screen, "green", block_4)
+    pygame.draw.rect(screen, "darkgreen", block_4)
 
     block_5 = pygame.Rect(400, HEIGHT - seed[3], 100, seed[3])
-    pygame.draw.rect(screen, "green", block_5)
+    pygame.draw.rect(screen, "darkgreen", block_5)
 
     block_6 = pygame.Rect(500, HEIGHT - seed[4], 100, seed[4])
-    pygame.draw.rect(screen, "green", block_6)
+    pygame.draw.rect(screen, "darkgreen", block_6)
 
     block_7 = pygame.Rect(600, HEIGHT - seed[5], 100, seed[5])
-    pygame.draw.rect(screen, "green", block_7)
+    pygame.draw.rect(screen, "darkgreen", block_7)
 
     block_8 = pygame.Rect(700, HEIGHT - seed[6], 100, seed[6])
-    pygame.draw.rect(screen, "green", block_8)
+    pygame.draw.rect(screen, "darkgreen", block_8)
 
     block_9 = pygame.Rect(800, HEIGHT - seed[7], 100, seed[7])
-    pygame.draw.rect(screen, "green", block_9)
+    pygame.draw.rect(screen, "darkgreen", block_9)
 
     blocks = [block_start, block_end, block_2, block_3, block_4, block_5, block_6, block_7, block_8, block_9]
     return blocks
 
 # Make rocket for the game
-rocket1 = Rocket(50, HEIGHT - 180 , 100, 50, "red", 1, 0, 0, 0, 0, np.pi/2, 0)
+rocket1 = Rocket(25, HEIGHT - 180 , 100, 50, "red", 1, 0, 0, 0, 0, np.pi/2, 0)
 
+#load in background/ other images
+background_image = pygame.image.load("backgroundimage.jpg")  # Replace with your background image path
+background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))  # Scale to fit screen
+sun_image = pygame.image.load("GOATV6.png")  # Load the sun image
+sun_image = pygame.transform.scale(sun_image, (200, 200))  # Scale the sun image
 # Main Game loop
 run = True
 while run:
     timer.tick(fps)
-    screen.fill("blue")
+    screen.blit(background_image, (0, 0))
+    screen.blit(sun_image, (WIDTH - 200, 0))  
     walls = draw_walls()
     rocket1.draw()
     rocket1.update_forces()
