@@ -1,4 +1,279 @@
-class test():
-	def __init__():
-		pass
-print(test.__name__)
+import pygame
+import numpy as np
+
+pygame.init()
+pygame.mixer.init()  # Initialize the mixer for sound
+
+WIDTH = 1000
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
+fps = 60
+timer = pygame.time.Clock()
+
+# Game variables
+GRAVITY = 0.15
+THRUST = 0.2
+TURN_AMOUNT = 5
+seed = np.random.randint(0, 250, 9)
+
+# Makes seed be 0 more often
+for i in range(len(seed)):
+    if seed[i] < 100:
+        seed[i] = 0
+
+# Load explosion sound
+explosion_sound = pygame.mixer.Sound("explosion_sound.wav")  # Ensure you have the sound file
+
+# Make rocket (rectangle)
+class Rocket:
+    def __init__(self, x_pos, y_pos, height, width, color, mass, x_speed, y_speed, x_acceleration, y_acceleration, angle, thrust):
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.height = height
+        self.width = width
+        self.color = color
+        self.mass = mass
+        self.x_speed = x_speed
+        self.y_speed = y_speed
+        self.x_acceleration = x_acceleration
+        self.y_acceleration = y_acceleration
+        self.angle = angle
+        self.thrust = thrust
+    
+    # Draw the rocket
+    def draw(self):
+        rocket = pygame.draw.rect(screen, self.color, (self.x_pos, self.y_pos, self.width, self.height))
+        return rocket
+
+    def update_forces(self):
+        # Update forces
+        self.y_force = self.mass * GRAVITY - self.thrust * np.sin(self.angle)
+        self.x_force = self.thrust * np.cos(self.angle)
+        
+        return self.x_force, self.y_force
+
+    def update_acceleration(self):
+        # Update acceleration based on forces
+        self.y_acceleration = self.y_force / self.mass
+        self.x_acceleration = self.x_force / self.mass
+    
+        return self.y_acceleration, self.x_acceleration
+
+    def update_speed(self):
+        # Updates speed based on the acceleration
+        self.y_speed += self.y_acceleration
+        self.x_speed += self.x_acceleration
+        
+        return self.x_speed, self.y_speed
+        
+    # Update position of rocket based on speed
+    def update_position(self):
+        self.x_pos += self.x_speed
+        self.y_pos += self.y_speed
+    
+    # Checks collision
+    def check_collision(self):
+        if self.x_pos < 0:
+            self.x_pos = 0
+            self.x_speed = 0
+        if self.x_pos > WIDTH - self.width:
+            self.x_pos = WIDTH - self.width
+            self.x_speed = 0
+        if self.y_pos < 0:
+            self.y_pos = 0
+            self.y_speed = 0
+        if self.y_pos > HEIGHT - self.height:
+            self.y_pos = HEIGHT - self.height
+            self.y_speed = 0
+
+    # Check collision with blocks
+    # Modify the check_collision_blocks method to check for the end block
+    def check_collision_blocks(self, blocks):
+        rocket_rect = pygame.Rect(self.x_pos, self.y_pos, self.width, self.height)
+
+        # The first two blocks in `blocks` are the start and end pads
+        start_pad, end_pad = blocks[0], blocks[1]
+
+        for block in blocks:
+            if rocket_rect.colliderect(block):
+                # If the rocket is on the start or end pad, allow it to land safely
+                if block == start_pad or block == end_pad:
+                    self.y_speed = 0
+                    self.y_pos = block.top - self.height  # Place rocket on top
+                    
+                    # Check if it's the end pad (win condition)
+                    if block == end_pad:
+                        show_you_win_screen()  # Show "You Win" screen
+                        reset_game()  # Reset the game after winning
+                else:
+                    # Collision with terrain → explosion + reset
+                    show_explosion()
+                    reset_game()
+                return  # Exit after handling the first collision
+
+
+    def print_info(self):
+        print(f"x_pos:{self.x_pos}, y_pos:{self.y_pos}, x_speed:{self.x_speed}, y_speed: {self.y_speed}, x_acceleration: {self.x_acceleration}, y_acceleration: {self.y_acceleration}, angle: {self.angle}, thrust: {self.thrust}")
+
+
+# Function to show explosion
+def show_explosion():
+    # Play the explosion sound
+    explosion_sound.play()  # Play the explosion sound when the explosion happens
+    
+    # Load explosion image
+    explosion_img = pygame.image.load("explosion.png")
+    explosion_img = pygame.transform.scale(explosion_img, (50, 50))  # Initial size of explosion
+
+    # Animate explosion from small to big
+    explosion_size = 50  # Initial size
+    max_size = 500  # Maximum size of explosion
+    scale_step = 50  # How much the explosion grows every frame
+    duration = 10  # Number of frames the explosion lasts
+
+    for i in range(duration):
+        screen.fill("blue")  # Clear the screen (for each frame)
+        # Draw other game elements here (rocket, blocks, etc.)
+        rocket1.draw()  # Draw rocket
+        
+        # Update explosion size (grow it over time)
+        explosion_size += scale_step
+        if explosion_size > max_size:
+            explosion_size = max_size  # Limit the maximum size
+
+        # Calculate the position to center the explosion on the rocket
+        explosion_x = rocket1.x_pos + rocket1.width // 2 - explosion_size // 2
+        explosion_y = rocket1.y_pos + rocket1.height // 2 - explosion_size // 2
+        
+        # Resize the explosion image to the new size
+        scaled_explosion = pygame.transform.scale(explosion_img, (explosion_size, explosion_size))
+        screen.blit(scaled_explosion, (explosion_x, explosion_y))  # Draw explosion centered on rocket
+
+        pygame.display.flip()  # Update display
+        pygame.time.delay(50)  # Delay to animate explosion (adjust for speed)
+
+    # After explosion animation, show "You Died" screen
+    show_you_died_screen()
+
+# Function to show "You Died" screen
+def show_you_died_screen():
+    you_died_img = pygame.image.load("you_died.jpeg")  # Load the image
+    you_died_img = pygame.transform.scale(you_died_img, (WIDTH, HEIGHT))  # Scale to fullscreen
+    screen.blit(you_died_img, (0, 0))  # Draw image covering the screen
+    
+	# Load and play the death sound
+    death_sound = pygame.mixer.Sound("death_sound.wav")  # Replace with the actual sound file path
+    death_sound.play()
+	
+    pygame.display.flip()  # Update the screen
+    pygame.time.delay(5000)  # Pause for 5 seconds
+
+# Function to show "You Win" screen
+def show_you_win_screen():
+    you_win_img = pygame.image.load("win_screen.png")  # Load the "You Win" image
+    you_win_img = pygame.transform.scale(you_win_img, (WIDTH, HEIGHT))  # Scale to fullscreen
+    win_sound = pygame.mixer.Sound("Boom._boom.wav.wav")
+    win_sound.play()
+    screen.blit(you_win_img, (0, 0))  # Draw image covering the screen
+    
+
+    
+    pygame.display.flip()  # Update the screen
+    pygame.time.delay(5000)  # Pause for 5 seconds to show the "You Win" screen
+
+# Function to reset the game
+def reset_game():
+    global rocket1, seed
+    seed = np.random.randint(0, 250, 9)  # Generate new terrain
+    rocket1 = Rocket(50, HEIGHT - 180, 100, 50, "red", 1, 0, 0, 0, 0, np.pi/2, 0)  # Reset rocket position
+
+# Make walls
+def draw_walls():
+    left = pygame.draw.line(screen, "green", (0, 0), (0, HEIGHT), 10)
+    right = pygame.draw.line(screen, "green", (WIDTH, 0), (WIDTH, HEIGHT), 10)
+    top = pygame.draw.line(screen, "green", (0, 0), (WIDTH, 0), 10)
+    bottom = pygame.draw.line(screen, "black", (0, HEIGHT), (WIDTH, HEIGHT), 10)
+    walls = [left, right, top, bottom]
+    return walls
+
+# Make procedural environment
+def make_envirement(WIDTH, HEIGHT, seed):
+    # Create starting pad
+    pygame.draw.rect(screen, "grey", (0, HEIGHT - 80, 100, 80) )
+    block_start = pygame.Rect(0, HEIGHT - 80, 100, 80)
+   
+    # Create ending pad
+    pygame.draw.rect(screen, "grey", (WIDTH - 100, HEIGHT - 80, 100, 80) )
+    block_end = pygame.Rect(WIDTH - 100, HEIGHT - 80, 100, 80)
+    
+    # Create block for each square, using random game variables
+    block_2 = pygame.Rect(100, HEIGHT - seed[0], 100, seed[0])
+    pygame.draw.rect(screen, "green", block_2)
+
+    block_3 = pygame.Rect(200, HEIGHT - seed[1], 100, seed[1])
+    pygame.draw.rect(screen, "green", block_3)
+    
+    block_4 = pygame.Rect(300, HEIGHT - seed[2], 100, seed[2])
+    pygame.draw.rect(screen, "green", block_4)
+
+    block_5 = pygame.Rect(400, HEIGHT - seed[3], 100, seed[3])
+    pygame.draw.rect(screen, "green", block_5)
+
+    block_6 = pygame.Rect(500, HEIGHT - seed[4], 100, seed[4])
+    pygame.draw.rect(screen, "green", block_6)
+
+    block_7 = pygame.Rect(600, HEIGHT - seed[5], 100, seed[5])
+    pygame.draw.rect(screen, "green", block_7)
+
+    block_8 = pygame.Rect(700, HEIGHT - seed[6], 100, seed[6])
+    pygame.draw.rect(screen, "green", block_8)
+
+    block_9 = pygame.Rect(800, HEIGHT - seed[7], 100, seed[7])
+    pygame.draw.rect(screen, "green", block_9)
+
+    blocks = [block_start, block_end, block_2, block_3, block_4, block_5, block_6, block_7, block_8, block_9]
+    return blocks
+
+# Make rocket for the game
+rocket1 = Rocket(50, HEIGHT - 180 , 100, 50, "red", 1, 0, 0, 0, 0, np.pi/2, 0)
+
+# Main Game loop
+run = True
+while run:
+    timer.tick(fps)
+    screen.fill("blue")
+    walls = draw_walls()
+    rocket1.draw()
+    rocket1.update_forces()
+    rocket1.update_acceleration()
+    rocket1.check_collision()
+    rocket1.update_speed()
+    rocket1.update_position()
+    rocket1.print_info()
+    blocks = make_envirement(WIDTH, HEIGHT, seed)
+    rocket1.check_collision_blocks(blocks)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+        
+        # Make the rocket move
+        if event.type == pygame.KEYDOWN:
+            keys = pygame.key.get_pressed()  # Get currently pressed keys
+            if keys[pygame.K_w]:
+                rocket1.thrust = THRUST
+            if keys[pygame.K_s]:
+                rocket1.thrust = -THRUST
+            if keys[pygame.K_a]:
+                rocket1.angle += np.radians(TURN_AMOUNT)
+            if keys[pygame.K_d]:
+                rocket1.angle -= np.radians(TURN_AMOUNT)
+
+        if event.type == pygame.KEYUP:  
+            if event.key in (pygame.K_w, pygame.K_s):  
+                    rocket1.thrust = 0  # Stop thrust when releasing keys
+
+    pygame.display.flip()
+
+pygame.quit()
