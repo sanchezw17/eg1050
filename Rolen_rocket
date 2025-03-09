@@ -120,6 +120,7 @@ class Rocket:
 def show_explosion():
     # Load explosion sound
     explosion_sound = pygame.mixer.Sound("explosion_sound.wav")  # Ensure you have the sound file
+    explosion_sound.set_volume(0.1)
     # Play the explosion sound
     explosion_sound.play()  # Play the explosion sound when the explosion happens
     
