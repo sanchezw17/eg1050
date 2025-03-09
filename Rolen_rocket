@@ -174,7 +174,7 @@ def show_you_died_screen():
 
 # Function to show "You Win" screen
 def show_you_win_screen():
-    you_win_img = pygame.image.load("win_screen.png")  # Load the "You Win" image
+    you_win_img = pygame.image.load("Hell v2.jpg")  # Load the "You Win" image
     you_win_img = pygame.transform.scale(you_win_img, (WIDTH, HEIGHT))  # Scale to fullscreen
     win_sound = pygame.mixer.Sound("Boom._boom.wav.wav")
     win_sound.play()
