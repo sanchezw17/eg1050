@@ -118,9 +118,13 @@ class Rocket:
         if self.y_pos < 0:
             self.y_pos = 0
             self.y_speed = 0
-        if self.y_pos > HEIGHT - self.height:
-            self.y_pos = HEIGHT - self.height
-            self.y_speed = 0
+        if self.y_pos > HEIGHT - self.height:  # If rocket touches the bottom
+            self.y_pos = HEIGHT - self.height  # Keep it within bounds
+            self.y_speed = 0  # Stop vertical movement
+
+            # Trigger death sequence
+            show_explosion()
+            reset_game()
 
     # Check collision with blocks
     def check_collision_blocks(self, blocks):
