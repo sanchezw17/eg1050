@@ -328,8 +328,7 @@ while run:
         rocket1.thrust = THRUST
         if not pygame.mixer.get_busy():  # Play only if not already playing
             engine_sound.play(-1)  # Loop the engine sound
-    if keys[pygame.K_s]:  # Thrust backward
-        rocket1.thrust = -THRUST
+    
 
     pygame.display.flip()
 
