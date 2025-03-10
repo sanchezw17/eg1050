@@ -175,7 +175,8 @@ def show_you_died_screen():
 
 # Function to show "You Win" screen
 def show_you_win_screen():
-    you_win_img = pygame.image.load("win_screen.png")  # Load the "You Win" image
+    engine_sound.stop()  # Stop the engine sound when the rocket lands
+    you_win_img = pygame.image.load("Hell v2.jpg")  # Load the "You Win" image
     you_win_img = pygame.transform.scale(you_win_img, (WIDTH, HEIGHT))  # Scale to fullscreen
     win_sound = pygame.mixer.Sound("Boom._boom.wav.wav")
     win_sound.play()
@@ -190,7 +191,7 @@ def show_you_win_screen():
 def reset_game():
     global rocket1, seed
     seed = np.random.randint(0, 250, 9)  # Generate new terrain
-    rocket1 = Rocket(25, HEIGHT - 180, 100, 50, "red", 1, 0, 0, 0, 0, np.pi/2, 0, scale = 1)  # Reset rocket position
+    rocket1 = Rocket(25, HEIGHT - 180, 100, 50, "red", 1, 0, 0, 0, 0, np.pi/2, 0)  # Reset rocket position
 
 # Make walls
 def draw_walls():
@@ -200,7 +201,6 @@ def draw_walls():
     bottom = pygame.draw.line(screen, "black", (0, HEIGHT), (WIDTH, HEIGHT), 10)
     walls = [left, right, top, bottom]
     return walls
-
 
 # Make procedural environment
 def make_envirement(WIDTH, HEIGHT, seed):
@@ -212,11 +212,30 @@ def make_envirement(WIDTH, HEIGHT, seed):
     pygame.draw.rect(screen, "darkgrey", (WIDTH - 100, HEIGHT - 80, 100, 80) )
     block_end = pygame.Rect(WIDTH - 100, HEIGHT - 80, 100, 80)
     
-    # Create procedural blocks
-    for i in range(8):
-        x_pos = 100 + i * 100
-        block = pygame.draw.rect(screen, "green", (x_pos, HEIGHT - seed[i], 100, seed[i]))
-        blocks.append(block)
+    # Create block for each square, using random game variables
+    block_2 = pygame.Rect(100, HEIGHT - seed[0], 100, seed[0])
+    pygame.draw.rect(screen, "white", block_2)
+
+    block_3 = pygame.Rect(200, HEIGHT - seed[1], 100, seed[1])
+    pygame.draw.rect(screen, "white", block_3)
+    
+    block_4 = pygame.Rect(300, HEIGHT - seed[2], 100, seed[2])
+    pygame.draw.rect(screen, "white", block_4)
+
+    block_5 = pygame.Rect(400, HEIGHT - seed[3], 100, seed[3])
+    pygame.draw.rect(screen, "white", block_5)
+
+    block_6 = pygame.Rect(500, HEIGHT - seed[4], 100, seed[4])
+    pygame.draw.rect(screen, "white", block_6)
+
+    block_7 = pygame.Rect(600, HEIGHT - seed[5], 100, seed[5])
+    pygame.draw.rect(screen, "white", block_7)
+
+    block_8 = pygame.Rect(700, HEIGHT - seed[6], 100, seed[6])
+    pygame.draw.rect(screen, "white", block_8)
+
+    block_9 = pygame.Rect(800, HEIGHT - seed[7], 100, seed[7])
+    pygame.draw.rect(screen, "white", block_9)
 
     blocks = [block_start, block_end, block_2, block_3, block_4, block_5, block_6, block_7, block_8, block_9]
     return blocks
