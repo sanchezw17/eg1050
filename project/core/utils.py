@@ -8,8 +8,9 @@ def show_you_win_screen():
     win_sound = pygame.mixer.Sound("project/linked_files/audio/Boom._boom.wav.wav")
     win_sound.play()
     screen.blit(win_img, (0, 0))
+
     pygame.display.flip()
-    pygame.time.delay(5000)
+    pygame.time.delay(10000)
 
 def show_you_died_screen():
     engine_sound.stop()  # Stop the engine sound when the rocket explodes

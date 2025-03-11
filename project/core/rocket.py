@@ -1,119 +1,117 @@
-import pygame as pg
-from core import environment
-from core.base_object import Base_Rectangle
-import physics_engine
+import pygame
 import numpy as np
-import math
+from settings import screen, WIDTH, HEIGHT, GRAVITY, seed
+from core.utils import show_you_win_screen, show_explosion, reset_game
 
+class Rocket:
+    def __init__(self, x_pos, y_pos, height, width, color, mass, x_speed, y_speed, x_acceleration, y_acceleration, angle, thrust):
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.height = height
+        self.width = width
+        self.color = color
+        self.mass = mass
+        self.x_speed = x_speed
+        self.y_speed = y_speed
+        self.x_acceleration = x_acceleration
+        self.y_acceleration = y_acceleration
+        self.angle = angle
+        self.thrust = thrust
 
-    
-class Rocket(Base_Rectangle):
-    def __init__(self,screen,launchsite,result = None,object_type = "rocket",dt=None,x=None,y=None,width=40,height=80):
-        self.original_image = pg.image.load('linked_files/rocket-147466_960_720.png')
-        self.original_image = pg.transform.scale(self.original_image, (50, 100))
-        self.image = self.original_image.copy()
-        self.image = pg.transform.rotate(self.image, 0)#self.tilt)
-        image_rect = self.image.get_rect()
-        
-        self.result = result
-        self.height = image_rect.height
-        self.width = image_rect.width
-        
-        self.screen = screen
-
-        self.x = launchsite.x+launchsite.width*.5-self.width*.5
-        self.y = launchsite.y-self.height
-        self.dt = dt
-        
-        #TESING INITIAL MASS, THRUST & ANGLE
-        self.mass = 10                      #EXAMPLE mass of rocket (kg)
-        self.thrust = 0                   #EXAMPLE initial thrust (N)
-        self.angle = np.radians(90)         #EXAMPLE initial angle of rocket (rad)
-        self.velocity = [0,0]
-
-        self.is_thrusting = False  # Tracks whether thrust is active
+        self.image = pygame.image.load("project/linked_files/png/rocket-147466_960_720.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (width, height))
+        self.image = pygame.transform.rotate(self.image, 180)
+        self.flame = pygame.image.load("project/linked_files/png/rocket-thrust-1.png").convert_alpha()
+        self.flame = pygame.transform.scale(self.flame, (width, 50))
 
     def draw(self):
-        
-        image = self.original_image
-        #image = self.original_image if self.vy >=0 else pg.transform.rotate(self.original_image, 180)
-        image_rect = image.get_rect()
-        image_rect.center = (self.x+self.width/2,self.y+self.height/2)
-            
-        pg.draw.rect(self.screen,"red",(self.x,self.y,self.width,self.height))
-        self.screen.blit(image, image_rect)
+        rotated_rocket = pygame.transform.rotate(self.image, np.degrees(self.angle) + 90)
+        rotated_rect = rotated_rocket.get_rect(center=(self.x_pos + self.width // 2, self.y_pos + self.height // 2))
+        screen.blit(rotated_rocket, rotated_rect.topleft)
 
-    def erase(self):
-        pass
+        if self.thrust > 0:
+            # Pre-rotate the flame sprite to align it with the rocket's starting orientation
+            pre_rotated_flame = pygame.transform.rotate(self.flame, -90)  # Rotate -90 degrees to align correctly
 
-    def compute_altitude(self):
-        return max(0, self.launchsite.y - self.y)
+            # Rotate the pre-rotated flame to match the rocket's current angle
+            rotated_flame = pygame.transform.rotate(pre_rotated_flame, np.degrees(self.angle))
 
-    def check_collision(self, other, environment):
-        if self.y + self.height > self.screen.get_height():
-            self.y = self.screen.get_height() - self.height
-            self.velocity[1] = 0
-            self.result = "Crash"
-            print("Collision: Rocket has hit the ground")
-        elif self.check_collision_with_terrain(environment):
-            self.result = "Crash"
-            print("Collision: Rocket has hit the terrain")
+            # Calculate flame offset based on the rocket's angle
+            angle_rad = self.angle  # Rocket's angle in radians
 
-    def check_collision_with_terrain(self, environment):
-        points = environment.points_full.T.tolist()
-        if self.x - self.width / 2 - 25 < 0:
-            low = 0
-        else:
-            low = int(self.x - self.width / 2 - 25)
-        if self.x + self.width / 2 + 25 > self.screen.get_width():
-            high = self.screen.get_width()
-        else:
-            high = int(self.x + self.width / 2 + 25)
-        for i in range(low, high):
-            p1 = points[i]
-            p2 = points[(i + 1) % len(points)]
+            # Flame should point in the opposite direction of the rocket's nose
+            # Use a fixed distance for the flame's offset
+            flame_distance = self.height * 0.6  # Fixed distance from the rocket's center
+            flame_offset_x = -np.cos(angle_rad) * flame_distance  # Horizontal offset
+            flame_offset_y = np.sin(angle_rad) * flame_distance   # Vertical offset
 
-            if physics_engine.line_circle_collision(self.x, self.y, self.width / 2, p1, p2):
-                return True  # Return True if collision occurs
+            # Calculate flame position
+            flame_rect = rotated_flame.get_rect(center=(
+                self.x_pos + flame_offset_x + self.width // 2,  # Center horizontally
+                self.y_pos + flame_offset_y + self.height // 2  # Center vertically
+            ))
 
-        return False  # Return False if no collision
+            screen.blit(rotated_flame, flame_rect.topleft)
 
-    def update(self,environment=None):
+    def update_forces(self):
+        # Update forces
+        self.y_force = self.mass * GRAVITY - self.thrust * np.sin(self.angle)
+        self.x_force = self.thrust * np.cos(self.angle)
+        return self.x_force, self.y_force
 
-        #EXAMPLE Calculate the magnitude of thrust components
-        thrust_x = self.thrust * np.cos(self.angle)
-        thrust_y = self.thrust * np.sin(self.angle)
+    def update_acceleration(self):
+        # Update acceleration based on forces
+        self.y_acceleration = self.y_force / self.mass
+        self.x_acceleration = self.x_force / self.mass
+        return self.y_acceleration, self.x_acceleration
 
-        #EXAMPLE Calculate force
-        force_x = thrust_x
-        force_y = thrust_y + (self.mass * environment.gravity) #inverted for pygame coordinates (0,0) at the top left
-        force = np.array([force_x, force_y])
+    def update_speed(self):
+        # Updates speed based on the acceleration
+        self.y_speed += self.y_acceleration
+        self.x_speed += self.x_acceleration
+        return self.x_speed, self.y_speed
 
-        #Use physics_engine to calculate acceleration with force and mass
-        acceleration = physics_engine.calculate_acceleration(force,self.mass)
+    # Update position of rocket based on speed
+    def update_position(self):
+        self.x_pos += self.x_speed
+        self.y_pos += self.y_speed
 
-        if self.is_thrusting: # Apply thrust when 'space' is pressed
-            # Apply thrust force
-            self.thrust_x = self.thrust * np.cos(self.angle)
-            self.thrust_y = self.thrust * np.sin(self.angle)
+    def print_info(self):
+        print(f"x_pos:{self.x_pos}, y_pos:{self.y_pos}, x_speed:{self.x_speed}, y_speed: {self.y_speed}, x_acceleration: {self.x_acceleration}, y_acceleration: {self.y_acceleration}, angle: {self.angle}, thrust: {self.thrust}")
 
-            self.force_x = self.thrust_x
-            self.force_y = self.thrust_y + (self.mass * environment.gravity)
+    def check_collision(self):
+        if self.x_pos < 0:
+            self.x_pos = 0
+            self.x_speed = 0
+        if self.x_pos > WIDTH - self.width:
+            self.x_pos = WIDTH - self.width
+            self.x_speed = 0
+        if self.y_pos < 0:
+            self.y_pos = 0
+            self.y_speed = 0
+        if self.y_pos > HEIGHT - self.height:
+            self.y_pos = HEIGHT - self.height
+            self.y_speed = 0
+    
+    def check_collision_blocks(self, blocks):
+        rocket_rect = pygame.Rect(self.x_pos, self.y_pos, self.width, self.height)
 
-            self.force = np.array([self.force_x, self.force_y])
-            self.acceleration = physics_engine.calculate_acceleration(self.force, self.mass)
+        # The first two blocks in `blocks` are the start and end pads
+        start_pad, end_pad = blocks[0], blocks[1]
 
-            self.launch()
+        for block in blocks:
+            if rocket_rect.colliderect(block):
+                # If the rocket is on the start or end pad, allow it to land safely
+                if block == start_pad or block == end_pad:
+                    self.y_speed = 0
+                    self.y_pos = block.top - self.height  # Place rocket on top
 
-    def launch(self):
-
-        # Update Velocity 
-        self.velocity = np.array(self.velocity) +(np.array(self.acceleration) * self.dt)
-
-        # Update position
-        self.x += self.velocity[0] * self.dt
-        self.y -= self.velocity[1] * self.dt        #inverted for pygame coordinates (0,0) at the top left
-
-
-
-
+                    # Check if it's the end pad (win condition)
+                    if block == end_pad:
+                        show_you_win_screen()  # Show "You Win" screen
+                        reset_game(self,seed)  # Reset the game after winning
+                else:
+                    # Collision with terrain → explosion + reset
+                    show_explosion(self)
+                    reset_game(self,seed)
+                return  # Exit after handling the first collision
