@@ -1,10 +1,10 @@
 import pygame
 import numpy as np
-from settings import screen, WIDTH, HEIGHT, GRAVITY, seed
+from settings import screen, WIDTH, HEIGHT, GRAVITY, seed, max_fuel, fuel_consumption_rate
 from core.utils import show_you_win_screen, show_explosion, reset_game
 
 class Rocket:
-    def __init__(self, x_pos, y_pos, height, width, color, mass, x_speed, y_speed, x_acceleration, y_acceleration, angle, thrust):
+    def __init__(self, x_pos, y_pos, height, width, color, mass, x_speed, y_speed, x_acceleration, y_acceleration, angle, thrust, fuel):
         self.x_pos = x_pos
         self.y_pos = y_pos
         self.height = height
@@ -17,6 +17,8 @@ class Rocket:
         self.y_acceleration = y_acceleration
         self.angle = angle
         self.thrust = thrust
+        self.fuel = max_fuel
+        self.fuel = min(fuel, max_fuel)
 
         self.image = pygame.image.load("project/linked_files/png/rocket-147466_960_720.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (width, height))
@@ -76,6 +78,15 @@ class Rocket:
         self.x_pos += self.x_speed
         self.y_pos += self.y_speed
 
+    def update_fuel(self):
+        if self.thrust > 0:
+            self.fuel -= fuel_consumption_rate
+
+        if self.fuel < 0:
+            self.fuel = 0
+            show_explosion(self)
+            reset_game(self,seed)
+        
     def print_info(self):
         print(f"x_pos:{self.x_pos}, y_pos:{self.y_pos}, x_speed:{self.x_speed}, y_speed: {self.y_speed}, x_acceleration: {self.x_acceleration}, y_acceleration: {self.y_acceleration}, angle: {self.angle}, thrust: {self.thrust}")
 
