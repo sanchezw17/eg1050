@@ -59,28 +59,28 @@ class Base_Circle(Base_object):
         if other.__class__.__name__=="Landingpad":
             return self.collide_with_platform(other,environment)
         
-        #This is for the terrain collision. I 
+        # This is for the terrain collision.
         points = environment.points_full.T.tolist()
         if self.x-self.radius-25 < 0:
-            low =0
+            low = 0
         else:
-            low =  int(self.x -self.radius -25 )
-        if self.x+self.radius+25 > self.screen.get_width():
+            low = int(self.x - self.radius - 25)
+        if self.x + self.radius + 25 > self.screen.get_width():
             high = self.screen.get_width()
         else:
-            high = int(self.x + self.radius + 25) 
-        for i in range(low,high):
-            
+            high = int(self.x + self.radius + 25)
+        for i in range(low, high):
             p1 = points[i]
-            p2 = points[(i+1)%len(points)]
+            p2 = points[(i + 1) % len(points)]
 
-            if physics_engine.line_circle_collision(self.x,self.y,self.radius,p1,p2):
+            if physics_engine.line_circle_collision(self.x, self.y, self.radius, p1, p2):
                 self.result = "Crash"
                 print("crash")
-                print(range(low,high))
+                print(range(low, high))
                 print(self.x)
-        
-        #def check_with_platform(self,other):
+                return True  # Return True if collision occurs
+
+        return False  # Return False if no collision
 
     def collide_with_platform(self,other,environment):
         pass
@@ -98,7 +98,28 @@ class Base_Rectangle(Base_object):
             self.vx = -self.vx
 
     def check_collision(self,other,environment):
-        pass
+        # This is for the terrain collision.
+        points = environment.points_full.T.tolist()
+        if self.x - self.width / 2 - 25 < 0:
+            low = 0
+        else:
+            low = int(self.x - self.width / 2 - 25)
+        if self.x + self.width / 2 + 25 > self.screen.get_width():
+            high = self.screen.get_width()
+        else:
+            high = int(self.x + self.width / 2 + 25)
+        for i in range(low, high):
+            p1 = points[i]
+            p2 = points[(i + 1) % len(points)]
+
+            if physics_engine.line_circle_collision(self.x, self.y, self.width / 2, p1, p2):
+                self.result = "Crash"
+                print("crash")
+                print(range(low, high))
+                print(self.x)
+                return True  # Return True if collision occurs
+
+        return False  # Return False if no collision
 
     def collide_with_platform(self,other,environment):
         pass
@@ -107,4 +128,4 @@ class Base_Rectangle(Base_object):
         if self.vx == 0:    
             return 0
         return np.arctan(self.vy/self.vx)
-    
+
