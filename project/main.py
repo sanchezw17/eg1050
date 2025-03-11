@@ -31,8 +31,6 @@ while run:
             if event.key == pygame.K_w:
                 rocket.thrust = 0
                 engine_sound.fadeout(250)
-            if event.key == pygame.K_s:
-                rocket.thrust = 0
 
     # Handle continuous key presses for rotation and thrust
     keys = pygame.key.get_pressed()
@@ -44,8 +42,6 @@ while run:
         rocket.thrust = THRUST
         if not pygame.mixer.get_busy():  # Play only if not already playing
             engine_sound.play(-1)  # Loop the engine sound
-    if keys[pygame.K_s]:  # Thrust backward
-        rocket.thrust = -THRUST
 
     pygame.display.flip()
 
