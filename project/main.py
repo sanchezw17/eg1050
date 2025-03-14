@@ -2,9 +2,11 @@ import pygame
 from settings import *
 from core.utils import *
 from core.rocket import Rocket
+from core.asteroids import Asteroid
 from core.environment import draw_walls, make_environment
 
 rocket = Rocket(25, HEIGHT - 180, 100, 50, "red", 1, 0, 0, 0, 0, np.pi / 2, 0)
+asteroids = [Asteroid(screen, x=np.random.randint(0, WIDTH), y=np.random.randint(0, HEIGHT), speed=np.random.uniform(1, 3)) for _ in range(10)]
 
 run = True
 while run:
@@ -22,6 +24,16 @@ while run:
     blocks = make_environment(WIDTH, HEIGHT, seed)
     rocket.check_collision_blocks(blocks)
 
+    for asteroid in asteroids:
+        asteroid.draw()
+
+    for asteroid in asteroids:
+        asteroid.update_position()
+        asteroid.check_boundary()
+        if asteroid.check_collision(rocket):
+            show_explosion(rocket)
+            reset_game(rocket, seed)
+              
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False

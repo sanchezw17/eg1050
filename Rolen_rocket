@@ -147,7 +147,6 @@ class Rocket:
                     reset_game()
                 return  # Exit after handling the first collision
 
-
     def print_info(self):
         print(f"x_pos:{self.x_pos}, y_pos:{self.y_pos}, x_speed:{self.x_speed}, y_speed: {self.y_speed}, x_acceleration: {self.x_acceleration}, y_acceleration: {self.y_acceleration}, angle: {self.angle}, thrust: {self.thrust}")
 
@@ -224,7 +223,8 @@ def show_you_win_screen():
 def reset_game():
     global rocket1, seed
     seed = np.random.randint(0, 250, 9)  # Generate new terrain
-    rocket1 = Rocket(25, HEIGHT - 180, 100, 50, "red", 1, 0, 0, 0, 0, np.pi/2, 0)  # Reset rocket position
+    rocket1 = Rocket(25, HEIGHT - 180, 100, 50, "red", 1, 0, 0, 0, 0, np.pi / 2, 0)  # Reset rocket position
+
 
 # Make walls
 def draw_walls():
@@ -277,6 +277,14 @@ background_image = pygame.image.load("backgroundimage.jpg")  # Replace with your
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))  # Scale to fit screen
 sun_image = pygame.image.load("GOATV6.png")  # Load the sun image
 sun_image = pygame.transform.scale(sun_image, (200, 200))  # Scale the sun image
+engine_sound = pygame.mixer.Sound("engine_sound.mp3")  # Load engine sound
+engine_sound.set_volume(0.2)  # Adjust volume if needed
+
+# Fuel setup
+max_fuel = 100
+fuel = max_fuel # Start with max fuel
+fuel_consumption_rate = 0.1
+fuel_font = pygame.font.SysFont("Arial", 24)
 # Main Game loop
 run = True
 while run:
@@ -297,28 +305,47 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-        
-        # Make the rocket move
-        if event.type == pygame.KEYDOWN:
-            keys = pygame.key.get_pressed()  # Get currently pressed keys
-            if keys[pygame.K_w]:
-                rocket1.thrust = THRUST
-            if keys[pygame.K_s]:
-                rocket1.thrust = -THRUST
-            if keys[pygame.K_a]:
-                if rocket1.angle == 2*np.radians(TURN_AMOUNT) + np.pi/2:
-                    pass
-                else:
-                    rocket1.angle += np.radians(TURN_AMOUNT)
-            if keys[pygame.K_d]:
-                if rocket1.angle == np.pi/2 - 2*np.radians(TURN_AMOUNT):
-                    pass
-                else:
-                    rocket1.angle -= np.radians(TURN_AMOUNT)
 
-        if event.type == pygame.KEYUP:  
-            if event.key in (pygame.K_w, pygame.K_s):  
-                    rocket1.thrust = 0  # Stop thrust when releasing keys
+        # Handle key releases (stop thrust when keys are released)
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_w:
+                rocket1.thrust = 0
+                engine_sound.fadeout(250)
+            if event.key == pygame.K_s:
+                rocket1.thrust = 0
+
+        # Check for reset when 'r' key is pressed
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r:
+                reset_game()
+        
+        # Thrusting (reduce fuel when up key is pressed) 
+        if keys[pygame.K_w]:
+            fuel -= fuel_consumption_rate
+            if fuel < 0:
+                fuel = 0 
+            else:
+                fuel = min(fuel, max_fuel)
+            # Draw fuel guage
+            pygame.draw.rect(screen, (0, 0, 0), (10, 10, 200, 20))
+            pygame.draw.rect(screen, (0, 255, 0), (10, 10, fuel * 2, 20))
+
+            # Display fuel level as text
+            fuel_test = fuel_font.render(f"Fuel: {int(fuel)}%", True, (255, 255, 255))
+            screen.blit(fuel_test, (10, 40))
+
+    # Handle continuous key presses for rotation and thrust
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_a]:  # Rotate counterclockwise (left)
+        rocket1.angle += np.radians(TURN_AMOUNT)  # Increase angle
+    if keys[pygame.K_d]:  # Rotate clockwise (right)
+        rocket1.angle -= np.radians(TURN_AMOUNT)  # Decrease angle
+    if keys[pygame.K_w]:  # Thrust forward
+        rocket1.thrust = THRUST
+        if not pygame.mixer.get_busy():  # Play only if not already playing
+            engine_sound.play(-1)  # Loop the engine sound
+    if keys[pygame.K_s]:  # Thrust backward
+        rocket1.thrust = -THRUST
 
     pygame.display.flip()
 
