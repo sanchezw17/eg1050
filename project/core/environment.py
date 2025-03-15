@@ -11,8 +11,10 @@ def draw_walls():
     return walls
 
 endstone = pygame.image.load("project/linked_files/png/end_stone.jpg").convert_alpha()
-
 endstone = pygame.transform.scale(endstone, (100, 80))
+
+coin_img = pygame.image.load("project/linked_files/png/Bitcoin.png").convert_alpha()
+coin_img = pygame.transform.scale(coin_img, (30, 30))
 
 def make_environment(WIDTH, HEIGHT, seed):
     # Create starting pad
@@ -35,5 +37,16 @@ def make_environment(WIDTH, HEIGHT, seed):
                 screen.blit(endstone, (x, y))
 
         blocks.append(block_rect)
-
+    
     return blocks
+
+# Make a func for coins
+def generate_coins():
+    coins = []
+    num_coins = random.randint(3, 5)  # Randomly choose between 3 to 5 coins
+    for _ in range(num_coins):
+        # Randomly place the coin near the top of the screen
+        coin_x = random.randint(50, WIDTH - 50)  # Avoid spawning too close to the edges
+        coin_y = random.randint(50, 200)  # Spawn near the top of the screen
+        coins.append((coin_x, coin_y))
+    return coins, coin_img

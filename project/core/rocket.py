@@ -24,6 +24,8 @@ class Rocket:
         self.flame = pygame.image.load("project/linked_files/png/rocket-thrust-1.png").convert_alpha()
         self.flame = pygame.transform.scale(self.flame, (width, 50))
 
+        self.score = 0  # Add a score variable to track collected coins
+
     def draw(self):
         rotated_rocket = pygame.transform.rotate(self.image, np.degrees(self.angle) + 90)
         rotated_rect = rotated_rocket.get_rect(center=(self.x_pos + self.width // 2, self.y_pos + self.height // 2))
@@ -115,3 +117,13 @@ class Rocket:
                     show_explosion(self)
                     reset_game(self,seed)
                 return  # Exit after handling the first collision
+
+
+    def check_collision_coins(self, coins):
+        for coin in coins[:]:  # Iterate over a copy of the list to avoid modifying it while iterating
+            coin_rect = pygame.Rect(coin[0], coin[1], 30, 30)  # Assuming coin size is 30x30
+            rocket_rect = pygame.Rect(self.x_pos, self.y_pos, self.width, self.height)  # Rocket's bounding box
+            if rocket_rect.colliderect(coin_rect):  # Check for collision
+                coins.remove(coin)  # Remove the coin
+                self.score += 1  # Increment the score
+                print(f"Coin collected! Score: {self.score}")  # Optional: Print score for debugging
