@@ -80,3 +80,29 @@ def reset_game(rocket, seed):
 
     seed[:] = np.random.randint(0, 250, 9)  # Generate new terrain
 
+import random
+# Load coin image & sound
+coin_img = pygame.image.load("coin.png")  # Replace with actual path
+
+# Coin setup
+coins = [pygame.Rect(random.randint(50, 450), random.randint(50, 350), 30, 30) for _ in range(5)]
+coin_count = 0  # Counter for collected coins
+
+def draw_coins():
+    """Draw coins on the screen."""
+    for coin in coins:
+        screen.blit(coin_img, (coin.x, coin.y))  # Draw each coin
+
+def check_coin_collision(player_rect):
+    """Check if the player collects a coin."""
+    global coin_count
+    for coin in coins[:]:  # Iterate over a copy
+        if player_rect.colliderect(coin):
+            coins.remove(coin)
+            coin_count += 1
+
+def draw_coin_counter():
+    """Display collected coin count."""
+    font = pygame.font.Font(None, 30)
+    text_surface = font.render(f"Coins: {coin_count}", True, (0, 0, 0))
+    screen.blit(text_surface, (20, 20))
