@@ -12,7 +12,7 @@ font = pygame.font.Font(None, 36)  # Choose a font and size
 coin_img = pygame.image.load("project/linked_files/png/b_bitcoin.png").convert_alpha()
 coin_img = pygame.transform.scale(coin_img, (30, 30))
 
-# Generating Coins
+# Generating Coins More Coins Better desc
 coins, coins_img = generate_coins()
 
 run = True
