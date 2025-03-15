@@ -1,130 +1,39 @@
-import pygame as pg
-import math
-import numpy as np
-from core.base_object import Base_object
-from core.static import *
+import pygame
+import random
+from settings import screen, WIDTH, HEIGHT, seed
 
-class Environment():
+def draw_walls():
+    left = pygame.draw.line(screen, "black", (0, 0), (0, HEIGHT), 10)
+    right = pygame.draw.line(screen, "black", (WIDTH, 0), (WIDTH, HEIGHT), 10)
+    top = pygame.draw.line(screen, "black", (0, 0), (WIDTH, 0), 10)
+    bottom = pygame.draw.line(screen, "black", (0, HEIGHT), (WIDTH, HEIGHT), 10)
+    walls = [left, right, top, bottom]
+    return walls
 
-    def __init__(self,screen,gravity=9.8,wind=0,objects=[],projectiles = [],start=None,end=None):
-        self.gravity = gravity
-        self.screen = screen
-        #self.screen = screen
-        self.objects = objects
-        self.start = start
-        self.projectiles = projectiles
-        self.end = end
-        self.all = objects + [start,end]+projectiles
-        self.points_first,self.points_mid, self.points_last=self.generate_terrain(screen,300)
-        self.points_full = np.concatenate((self.points_first,self.points_mid,self.points_last),axis=1)
-        self.draw_terrain(screen)
+endstone = pygame.image.load("project/linked_files/png/end_stone.jpg").convert_alpha()
 
-        self.set_end(self.points_last)
+endstone = pygame.transform.scale(endstone, (100, 80))
 
-        # Load the sunshine image
-        self.sunshine_image = pg.image.load("linked_files/sunshine.png")  # Make sure the file exists
-        self.sunshine_image = pg.transform.scale(self.sunshine_image, (200, 200))  # Resize if needed
+def make_environment(WIDTH, HEIGHT, seed):
+    # Create starting pad
+    pygame.draw.rect(screen, "darkgrey", (0, HEIGHT - 80, 100, 80))
+    block_start = pygame.Rect(0, HEIGHT - 80, 100, 80)
+
+    # Create ending pad
+    pygame.draw.rect(screen, "darkgrey", (WIDTH - 100, HEIGHT - 80, 100, 80))
+    block_end = pygame.Rect(WIDTH - 100, HEIGHT - 80, 100, 80)
+
+    # Create block for each square, using random game variables
+    blocks = [block_start, block_end]
+    for i in range(1,9):
+        block_height = seed[i-1]
+        block_rect = pygame.Rect(100 * (i), HEIGHT - block_height, 100, block_height)
 
 
-    def set_end(self,points):
+        for x in range(block_rect.left, block_rect.right, endstone.get_width()):
+            for y in range(block_rect.top, block_rect.bottom, endstone.get_height()):
+                screen.blit(endstone, (x, y))
 
-        init = Landingpad(self.screen,x=None,y=None)
-        
+        blocks.append(block_rect)
 
-        x,y = points
-        
-        if abs(x[-1]-x[0]) < init.width:
-            raise ValueError("The landing pad is too wide for the terrain")
-        
-        width = init.width
-        height = init.height
-       # high = max()
-        low = min(x[0]+0.5*width, x[-1]-0.5*width)
-        #print(low,high)
-        x = np.random.randint(x[0], x[-1]-width,1)
-        y = y[0]-height
-
-        init.x = x[0]
-        init.y = y
-        print(init.__dict__)
-        self.end = init
-
-    def place_objects(self,object):
-
-        init = object(self.screen)
-
-        x,y = self.points_mid
-
-        if abs(x[-1]-x[0]) < init.width:
-            raise ValueError("The object is too wide for the terrain")
-        
-        width = init.width
-        height = init.height
-
-        x_coord = np.random.randint(len(x)/2, x[-1]-width-20,1)
-
-        #y_indx = np.random.randint(x[0],x[-1])
-        y_indx = x_coord[0]
-        init.x = x_coord[0]
-        init.y = self.points_full[1][y_indx]-height
-        if init.static:
-            print(init.static)
-            self.objects.append(init)
-        else:
-            print(init.static)
-            self.projectiles.append(init)
-
-    def draw_terrain(self,screen):
-
-        points = self.points_full.T.tolist()
-        points.append([self.screen.get_width(),points[-1][1]])
-        points.append([self.screen.get_width(),self.screen.get_height()])
-        points.append([0,self.screen.get_height()])
-        for ii in range(len(points)-1):
-            pg.draw.polygon(screen,(95, 72, 59),points)
-    
-    def draw_sunshine(self):
-        # Draws the moon image in the top-right corner of the screen
-        screen_width = self.screen.get_width()
-        self.screen.blit(self.sunshine_image, (screen_width - 220, 20))  # 10px margin from top-right
-
-    def draw_objects(self):
-        for obj in self.objects:
-            obj.draw()
-            
-        self.start.draw()
-        self.end.draw()
-
-        self.draw_sunshine()
-
-    def erase_objects(self):
-        pg.draw.polygon(self.screen,"black",self.points_full.T.tolist())
-        
-    def generate_terrain(self,screen,max_height,segments=10):
-        x_coord = list(range(0,screen.get_width()))
-        #gives the number of points in each segment
-        initial_segment = self.start.x + self.start.width
-
-        seg = (screen.get_width()-initial_segment)/(segments-1) 
-        y_coord = np.repeat(np.array([self.start.y + self.start.height]),initial_segment)
-        first_y = y_coord.copy()
-        for ii in range(1,segments):
-            y_init = np.random.randint(screen.get_height()-max_height,screen.get_height(),1)
-            y_coord=np.append(y_coord,np.repeat(y_init,seg))
-
-        if y_coord.shape[0] < screen.get_width():
-            leftover = screen.get_width() - y_coord.shape[0]
-            y_coord = np.append(y_coord,np.repeat(y_init,leftover))
-            
-        last_y = np.repeat(y_init,seg)
-        last_x = x_coord[len(x_coord)-last_y.shape[0]::]
-
-        first_x = x_coord[0:int(initial_segment)]
-        #points,last_points = np.array([x_coord,y_coord]),np.array([last_x,last_y])
-        
-        first_points = np.array([first_x,first_y])
-        mid_points = np.array([x_coord[0+int(initial_segment):len(x_coord)-last_y.shape[0]],y_coord[0+int(initial_segment):len(x_coord)-last_y.shape[0]]])
-        last_points = np.array([last_x,last_y])
-        
-        return first_points,mid_points, last_points
-
+    return blocks
