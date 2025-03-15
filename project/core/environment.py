@@ -1,4 +1,5 @@
 import pygame
+import random
 from settings import screen, WIDTH, HEIGHT, seed
 
 def draw_walls():
@@ -24,9 +25,9 @@ def make_environment(WIDTH, HEIGHT, seed):
 
     # Create block for each square, using random game variables
     blocks = [block_start, block_end]
-    for i in range(3, 9):
-        block_height = seed[i - 2]
-        block_rect = pygame.Rect(100 * (i - 1), HEIGHT - block_height, 100, block_height)
+    for i in range(1,9):
+        block_height = seed[i-1]
+        block_rect = pygame.Rect(100 * (i), HEIGHT - block_height, 100, block_height)
 
 
         for x in range(block_rect.left, block_rect.right, endstone.get_width()):

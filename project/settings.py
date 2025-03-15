@@ -15,10 +15,9 @@ timer = pygame.time.Clock()
 GRAVITY = 0.15
 THRUST = 0.2
 TURN_AMOUNT = 0.87
-seed = np.random.randint(0, 250, 9)
+seed = np.random.randint(0, 350, 9)
 
-# Makes seed be 0 more often
-seed[seed < 100] = 0
+seed[seed < 100] = abs(seed[seed<100])
 
 # Load assets
 background_image = pygame.image.load("project/linked_files/png/backgroundimage.jpg")
