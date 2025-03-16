@@ -106,3 +106,31 @@ def draw_coin_counter():
     font = pygame.font.Font(None, 30)
     text_surface = font.render(f"Coins: {coin_count}", True, (0, 0, 0))
     screen.blit(text_surface, (20, 20))
+
+# Asteroid setup
+asteroids = [pygame.Rect(random.randint(0, 750), random.randint(-600, -50), 50, 50) for _ in range(5)]
+asteroid_speed = 3
+
+# Load Images
+you_died_img = pygame.image.load("project/linked_files/png/you_died.jpeg")  
+asteroid_img = pygame.image.load("project/linked_files/png/asteroid.png")  
+
+def move_asteroids():
+    for asteroid in asteroids:
+        asteroid.y += asteroid_speed
+        if asteroid.y > 600:  # Reset asteroid to top when it leaves screen
+            asteroid.y = random.randint(-600, -50)
+            asteroid.x = random.randint(0, 750)
+
+def draw_asteroids(screen):
+    for asteroid in asteroids:
+        screen.blit(asteroid_img, (asteroid.x, asteroid.y))  
+
+def check_collision(player, screen):
+    for asteroid in asteroids:
+        if player.colliderect(asteroid):
+            screen.blit(you_died_img, (0, 0))  # Show "You Died"
+            pygame.display.flip()  # Refresh screen
+            pygame.time.delay(2000)  # Pause for 2 seconds
+            pygame.quit()  # Quit the game
+            exit()  # Ensure program stops
