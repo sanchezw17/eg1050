@@ -129,8 +129,15 @@ def draw_asteroids(screen):
 def check_collision(player, screen):
     for asteroid in asteroids:
         if player.colliderect(asteroid):
-            screen.blit(you_died_img, (0, 0))  # Show "You Died"
-            pygame.display.flip()  # Refresh screen
-            pygame.time.delay(2000)  # Pause for 2 seconds
-            pygame.quit()  # Quit the game
-            exit()  # Ensure program stops
+            engine_sound.stop()  # Stop the engine sound when the rocket explodes
+            you_died_img = pygame.image.load("project/linked_files/png/you_died.jpeg")  # Load the image
+            you_died_img = pygame.transform.scale(you_died_img, (WIDTH, HEIGHT))  # Scale to fullscreen
+            screen.blit(you_died_img, (0, 0))  # Draw image covering the screen
+
+            # Load and play the death sound
+            death_sound = pygame.mixer.Sound("project/linked_files/audio/death_sound.wav")  # Replace with the actual sound file path
+            death_sound.set_volume(1.0)
+            death_sound.play()
+
+            pygame.display.flip()  # Update the screen
+            pygame.time.delay(5500)
