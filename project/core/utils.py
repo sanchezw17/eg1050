@@ -81,8 +81,8 @@ def reset_game(rocket, seed):
     seed[:] = np.random.randint(0, 250, 9)  # Generate new terrain
 
 import random
-# Load coin image & sound
-coin_img = pygame.image.load("coin.png")  # Replace with actual path
+# Load coin image
+coin_img = pygame.image.load("project/linked_files/png/coin.png")  
 
 # Coin setup
 coins = [pygame.Rect(random.randint(50, 450), random.randint(50, 350), 30, 30) for _ in range(5)]
