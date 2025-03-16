@@ -6,10 +6,10 @@ from core.environment import draw_walls, make_environment, generate_coins
 
 rocket = Rocket(25, HEIGHT - 180, 100, 50, "red", 1, 0, 0, 0, 0, np.pi / 2, 0)
 
-font = pygame.font.Font(None, 36)  # Choose a font and size
+font = pygame.font.SysFont("Comic Sans", 30)  # Choose a font and size
 
 # Load coin image directly in main.py
-coin_img = pygame.image.load("project/linked_files/png/b_bitcoin.png").convert_alpha()
+coin_img = pygame.image.load("project/linked_files/png/coin.png").convert_alpha()
 coin_img = pygame.transform.scale(coin_img, (30, 30))
 
 # Generating Coins More Coins Better desc
@@ -32,8 +32,8 @@ while run:
     rocket.check_collision_blocks(blocks)
 
     # In the game loop, after drawing everything else
-    score_text = font.render(f"Score: {rocket.score}", True, (255, 255, 255))  # White text
-    screen.blit(score_text, (10, 10))  # Display at the top-left corner
+    score_text = font.render(f"Score: {rocket.score}", True, (255, 255, 255,))  # White text
+    screen.blit(score_text, (10, 60))  # Display at the top-left corner
 
     # Check for collisions with coins
     rocket.check_collision_coins(coins)
