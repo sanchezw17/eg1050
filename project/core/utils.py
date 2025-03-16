@@ -1,6 +1,7 @@
 import pygame
 import numpy as np
 from settings import screen, WIDTH, HEIGHT, background_image, engine_sound, max_fuel
+
 def show_you_win_screen():
     win_img = pygame.image.load("project/linked_files/png/Hell v2.jpg")
     win_img = pygame.transform.scale(win_img, (WIDTH, HEIGHT))
@@ -77,6 +78,7 @@ def reset_game(rocket, seed):
     rocket.angle = np.pi / 2
     rocket.thrust = 0
     rocket.fuel = max_fuel
+    rocket.shield_strength = 1
 
     seed[:] = np.random.randint(0, 250, 9)  # Generate new terrain
 
