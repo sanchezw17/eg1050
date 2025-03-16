@@ -34,7 +34,7 @@ while run:
 
     # In the game loop, after drawing everything else
     score_text = font.render(f"Score: {rocket.score}", True, (255, 255, 255,))  # White text
-    screen.blit(score_text, (10, 60))  # Display at the top-left corner
+    screen.blit(score_text, (8, 70))  # Display at the top-left corner
 
     # Check for collisions with coins
     rocket.check_collision_coins(coins)
