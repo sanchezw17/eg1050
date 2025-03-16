@@ -17,6 +17,12 @@ THRUST = 0.2
 TURN_AMOUNT = 0.87
 seed = np.random.randint(0, 250, 9)
 
+# Fuel setup
+max_fuel = 100
+fuel = max_fuel # Start with max fuel
+fuel_consumption_rate = 0.2
+fuel_font = pygame.font.SysFont("Comic Sans", 30)
+
 # Makes seed be 0 more often
 seed[seed < 100] = 0
 
