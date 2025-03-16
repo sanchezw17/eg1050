@@ -5,7 +5,7 @@ from core.rocket import Rocket
 from core.asteroids import Asteroid
 from core.environment import draw_walls, make_environment
 
-rocket = Rocket(25, HEIGHT - 180, 100, 50, "red", 1, 0, 0, 0, 0, np.pi / 2, 0)
+rocket = Rocket(25, HEIGHT - 180, 100, 50, "red", 1, 0, 0, 0, 0, np.pi / 2, 0, 100)
 asteroids = [Asteroid(screen, x=np.random.randint(0, WIDTH), y=np.random.randint(0, HEIGHT), speed=np.random.uniform(1, 3)) for _ in range(10)]
 
 run = True
@@ -21,6 +21,7 @@ while run:
     rocket.update_speed()
     rocket.update_position()
     rocket.print_info()
+    rocket.update_fuel()
     blocks = make_environment(WIDTH, HEIGHT, seed)
     rocket.check_collision_blocks(blocks)
 
@@ -54,6 +55,14 @@ while run:
         rocket.thrust = THRUST
         if not pygame.mixer.get_busy():  # Play only if not already playing
             engine_sound.play(-1)  # Loop the engine sound
+
+    # Draw fuel guage
+    pygame.draw.rect(screen, (0, 0, 0), (10, 10, 200, 20))
+    pygame.draw.rect(screen, (0, 255, 0), (10, 10, rocket.fuel * 4, 20))
+
+    # Display fuel level as text
+    fuel_test = fuel_font.render(f"Fuel: {int(rocket.fuel)}%", True, (255, 255, 255))
+    screen.blit(fuel_test, (10, 40))
 
     pygame.display.flip()
 

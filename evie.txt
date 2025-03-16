@@ -1,0 +1,259 @@
+fps = 60
+timer = pygame.time.Clock()
+dt = timer.tick(fps) / 120
+
+# Game variables
+GRAVITY = 0.15
+THRUST = 0.2
+TURN_AMOUNT = 5
+seed = np.random.randint(0, 250, 9)
+GRAVITY = 9.81 #m/2^2
+THRUST = 100 #N
+TURN_AMOUNT = 10
+seed = np.random.randint(0,250,9)
+
+
+# Makes seed be 0 more often
+for i in range(len(seed)):
+    if seed[i] < 100:
+        seed[i] = 0
+
+
+
+# Make rocket (rectangle)
+class Rocket:
+    def __init__(self, x_pos, y_pos, height, width, color, mass, x_speed, y_speed, x_acceleration, y_acceleration, angle, thrust):
+    def __init__(self,x_pos,y_pos,height,width,color,mass,x_speed,y_speed,x_acceleration,y_acceleration, angle,thrust,scale):
+        self.image = pygame.image.load("project/linked_files/rocket-147466_960_720.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (width * scale, height * scale))
+
+        self.flame = pygame.image.load("project/linked_files/rocket-thrust-1.png").convert_alpha()
+        self.flame = pygame.transform.scale(self.flame, (width * scale, 50 * scale))  
+
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.height = height
+
+@@ -42,14 +48,43 @@ class Rocket:
+    
+    # Draw the rocket
+    def draw(self):
+        rocket = pygame.draw.rect(screen, self.color, (self.x_pos, self.y_pos, self.width, self.height))
+        return rocket
+
+        # Create the rocket rectangle
+        rocket_rect = pygame.Rect(self.x_pos, self.y_pos, self.width, self.height)
+    
+        # Create the rotated surface
+        rotated_rocket = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+
+        # Rotate the rocket image
+        rotated_rocket = pygame.transform.rotate(self.image, np.degrees(self.angle)-90)
+        rotated_rect = rotated_rocket.get_rect(center=rocket_rect.center)
+
+        # Draw the rotated rocket
+        screen.blit(rotated_rocket, rotated_rect.topleft)
+
+        # Draw flame if thrust is active
+        if self.thrust > 0:
+            rotated_flame = pygame.transform.rotate(self.flame, np.degrees(self.angle) - 90)
+
+            # Offset distance based on the rocket's size
+            offset_distance_x = self.height * 0.6  # Adjust multiplier if needed
+            offset_distance_y = self.height * 1.2  # Adjust multiplier if needed
+
+            # Compute flame position behind the rocket using trigonometry
+            offset_x = np.cos(self.angle) * -offset_distance_x
+            offset_y = np.sin(self.angle) * offset_distance_y
+
+            flame_rect = rotated_flame.get_rect(center=(
+                self.x_pos + offset_x + 25,
+                self.y_pos + offset_y
+            ))
+
+            screen.blit(rotated_flame, flame_rect.topleft)
+    def update_forces(self):
+        # Update forces
+        self.y_force = self.mass * GRAVITY - self.thrust * np.sin(self.angle)
+        # Thrust should be applied in the direction of the rocket's angle
+        self.y_force = self.mass * GRAVITY - self.thrust * np.sin(self.angle)  # Gravity is always downward
+        self.x_force = self.thrust * np.cos(self.angle)
+        
+    
+        return self.x_force, self.y_force
+
+    def update_acceleration(self):
+
+@@ -59,20 +94,21 @@ class Rocket:
+    
+        return self.y_acceleration, self.x_acceleration
+
+    def update_speed(self):
+    def update_speed(self, dt):
+        # Updates speed based on the acceleration
+        self.y_speed += self.y_acceleration
+        self.x_speed += self.x_acceleration
+        self.y_speed += self.y_acceleration * dt
+        self.x_speed += self.x_acceleration * dt
+        
+        return self.x_speed, self.y_speed
+        
+    # Update position of rocket based on speed
+    def update_position(self):
+        self.x_pos += self.x_speed
+        self.y_pos += self.y_speed
+# Checks collision
+    def check_collision(self):
+
+    def update_position(self, dt):
+        # Update position of rocket based on speed
+        self.x_pos += self.x_speed * dt
+        self.y_pos += self.y_speed * dt
+    
+    #Checks collision KEEP IN MIND POSITION OF RECTANGLE IS TOP LEFT CORNER OF IT
+    def check_collision(self, blocks):
+        global game_over
+        if self.x_pos < 0: # left boundary
+            self.x_pos = 0
+            self.x_speed = 0
+        if self.y_pos + self.height >= HEIGHT: # hitting the ground
+          game_over = True
+
+        rocket_rect = pygame.Rect(self.x_pos, self.y_pos, self.width, self.height)
+        for block in blocks: # collition with objects
+          if rocket_rect.colliderect(block):
+            game_over = True
+            self.y_speed = 0
+            self.x_speed = 0
+  def game_over_screen():
+    screen.fill((0, 0, 0)) 
+    font = pygame.font.Font(None, 74)
+    text = font.render("GAME OVER", True, (255, 0, 0))
+    restart_text = pygame.font.Font(None, 40).render("Press R to Restart", True, (255, 255, 255))
+    screen.blit(text, (WIDTH // 2 - 150, HEIGHT // 2 - 50))
+    screen.blit(restart_text, (WIDTH // 2 - 130, HEIGHT // 2 + 20))
+    pygame.display.flip()
+
+    # wait for player to press r
+    waiting = True
+    while waiting:
+      for event in pygame.event.get()
+        if event.type == pygame.QUIT:
+          pygame.quit()
+          exit()
+        if event.type == pygame.KEYDOWN:
+          if event.key == pygame.K_r:
+            waiting = False # exit loop when r is pressed
+
+@@ -198,47 +234,43 @@ def draw_walls():
+    bottom = pygame.draw.line(screen, "black", (0, HEIGHT), (WIDTH, HEIGHT), 10)
+    walls = [left, right, top, bottom]
+    return walls
+
+# Make procedural environment
+#Make procedural environment
+def make_environment(WIDTH, HEIGHT, seed):
+    blocks = []
+    # Create starting pad
+    pygame.draw.rect(screen, "darkgrey", (0, HEIGHT - 80, 100, 80) )
+    block_start = pygame.Rect(0, HEIGHT - 80, 100, 80)
+    blocks.append(pygame.draw.rect(screen, "grey", (0, HEIGHT - 80, 100, 80)))
+   
+    # Create ending pad
+    pygame.draw.rect(screen, "darkgrey", (WIDTH - 100, HEIGHT - 80, 100, 80) )
+    block_end = pygame.Rect(WIDTH - 100, HEIGHT - 80, 100, 80)
+    
+    # Create block for each square, using random game variables
+    block_2 = pygame.Rect(100, HEIGHT - seed[0], 100, seed[0])
+    pygame.draw.rect(screen, "darkgreen", block_2)
+
+    block_3 = pygame.Rect(200, HEIGHT - seed[1], 100, seed[1])
+    pygame.draw.rect(screen, "darkgreen", block_3)
+    blocks.append(pygame.draw.rect(screen, "grey", (WIDTH - 100, HEIGHT - 80, 100, 80)))
+    
+    block_4 = pygame.Rect(300, HEIGHT - seed[2], 100, seed[2])
+    pygame.draw.rect(screen, "darkgreen", block_4)
+    # Create procedural blocks
+    for i in range(8):
+        x_pos = 100 + i * 100
+        block = pygame.draw.rect(screen, "green", (x_pos, HEIGHT - seed[i], 100, seed[i]))
+        blocks.append(block)
+
+    block_5 = pygame.Rect(400, HEIGHT - seed[3], 100, seed[3])
+    pygame.draw.rect(screen, "darkgreen", block_5)
+
+    block_6 = pygame.Rect(500, HEIGHT - seed[4], 100, seed[4])
+    pygame.draw.rect(screen, "darkgreen", block_6)
+
+    block_7 = pygame.Rect(600, HEIGHT - seed[5], 100, seed[5])
+    pygame.draw.rect(screen, "darkgreen", block_7)
+
+    block_8 = pygame.Rect(700, HEIGHT - seed[6], 100, seed[6])
+    pygame.draw.rect(screen, "darkgreen", block_8)
+    return blocks
+
+    block_9 = pygame.Rect(800, HEIGHT - seed[7], 100, seed[7])
+    pygame.draw.rect(screen, "darkgreen", block_9)
+# Make procedural environment
+def make_environment(WIDTH, HEIGHT, seed):
+    blocks = []
+    # Create starting pad
+    blocks.append(pygame.draw.rect(screen, "grey", (0, HEIGHT - 80, 100, 80)))
+   
+    # Create ending pad
+    blocks.append(pygame.draw.rect(screen, "grey", (WIDTH - 100, HEIGHT - 80, 100, 80)))
+    
+    # Create procedural blocks
+    for i in range(8):
+        x_pos = 100 + i * 100
+        block = pygame.draw.rect(screen, "green", (x_pos, HEIGHT - seed[i], 100, seed[i]))
+        blocks.append(block)
+
+    blocks = [block_start, block_end, block_2, block_3, block_4, block_5, block_6, block_7, block_8, block_9]
+    return blocks
+
+# Make rocket for the game
+rocket1 = Rocket(25, HEIGHT - 180 , 100, 50, "red", 1, 0, 0, 0, 0, np.pi/2, 0)
+rocket1 = Rocket(25, HEIGHT - 180 , 100, 50, "red", 10, 0, 0, 0, 0, np.pi/2, 0, scale=1)
+blocks = make_environment(WIDTH, HEIGHT, seed)
+
+#load in background/ other images
+background_image = pygame.image.load("backgroundimage.jpg")  # Replace with your background image path
+
+@@ -255,9 +287,9 @@ while run:
+    rocket1.draw()
+    rocket1.update_forces()
+    rocket1.update_acceleration()
+    rocket1.check_collision()
+    rocket1.update_speed()
+    rocket1.update_position()
+    rocket1.check_collision(blocks)
+    rocket1.update_speed(dt)
+    rocket1.update_position(dt)
+    rocket1.print_info()
+    blocks = make_environment(WIDTH, HEIGHT, seed)
+    rocket1.check_collision_blocks(blocks)
+
+    if game_over:
+      game_over_screen()
+
+@@ -274,9 +306,15 @@ while run:
+            if keys[pygame.K_s]:
+                rocket1.thrust = -THRUST
+            if keys[pygame.K_a]:
+                rocket1.angle += np.radians(TURN_AMOUNT)
+                if rocket1.angle == 2*np.radians(TURN_AMOUNT) + np.pi/2:
+                    pass
+                else:
+                    rocket1.angle += np.radians(TURN_AMOUNT)
+            if keys[pygame.K_d]:
+                rocket1.angle -= np.radians(TURN_AMOUNT)
+                if rocket1.angle == np.pi/2 - 2*np.radians(TURN_AMOUNT):
+                    pass
+                else:
+                    rocket1.angle -= np.radians(TURN_AMOUNT)
+
+        if event.type == pygame.KEYUP:  
+            if event.key in (pygame.K_w, pygame.K_s):  
+
+
