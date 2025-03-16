@@ -4,7 +4,7 @@ from core.utils import *
 from core.rocket import Rocket
 from core.environment import draw_walls, make_environment, generate_coins
 
-rocket = Rocket(25, HEIGHT - 180, 100, 50, "red", 1, 0, 0, 0, 0, np.pi / 2, 0)
+rocket = Rocket(25, HEIGHT - 180, 100, 50, "red", 1, 0, 0, 0, 0, np.pi / 2, 0, 100)
 
 font = pygame.font.SysFont("Comic Sans", 30)  # Choose a font and size
 
@@ -28,6 +28,7 @@ while run:
     rocket.update_speed()
     rocket.update_position()
     rocket.print_info()
+    rocket.update_fuel()
     blocks = make_environment(WIDTH, HEIGHT, seed)
     rocket.check_collision_blocks(blocks)
 
@@ -51,8 +52,6 @@ while run:
             if event.key == pygame.K_w:
                 rocket.thrust = 0
                 engine_sound.fadeout(250)
-            if event.key == pygame.K_s:
-                rocket.thrust = 0
 
     # Handle continuous key presses for rotation and thrust
     keys = pygame.key.get_pressed()
@@ -64,8 +63,14 @@ while run:
         rocket.thrust = THRUST
         if not pygame.mixer.get_busy():  # Play only if not already playing
             engine_sound.play(-1)  # Loop the engine sound
-    if keys[pygame.K_s]:  # Thrust backward
-        rocket.thrust = -THRUST
+
+    # Draw fuel guage
+    pygame.draw.rect(screen, (0, 0, 0), (10, 10, 200, 20))
+    pygame.draw.rect(screen, (0, 255, 0), (10, 10, rocket.fuel * 4, 20))
+
+    # Display fuel level as text
+    fuel_test = fuel_font.render(f"Fuel: {int(rocket.fuel)}%", True, (255, 255, 255))
+    screen.blit(fuel_test, (10, 40))
 
     pygame.display.flip()
 
