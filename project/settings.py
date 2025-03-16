@@ -23,8 +23,7 @@ fuel = max_fuel # Start with max fuel
 fuel_consumption_rate = 0.2
 fuel_font = pygame.font.SysFont("Comic Sans", 30)
 
-# Makes seed be 0 more often
-seed[seed < 100] = 0
+seed[seed < 100] = abs(seed[seed<100])
 
 # Load assets
 background_image = pygame.image.load("project/linked_files/png/backgroundimage.jpg")
