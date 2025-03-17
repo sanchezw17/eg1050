@@ -50,3 +50,16 @@ def generate_coins():
         coin_y = random.randint(50, 200)  # Spawn near the top of the screen
         coins.append((coin_x, coin_y))
     return coins, coin_img
+
+# Load coin sound
+coin_sound = pygame.mixer.Sound("project/linked_files/audio/mario.mp3")
+
+def check_coin_collision(player_rect, coins):
+    new_coins = []
+    for coin_x, coin_y in coins:
+        coin_rect = pygame.Rect(coin_x, coin_y, 30, 30)  # Create coin's hitbox
+        if player_rect.colliderect(coin_rect):  # Check collision
+            coin_sound.play()  # Play sound when collected
+        else:
+            new_coins.append((coin_x, coin_y))  # Keep uncollected coins
+    return new_coins
