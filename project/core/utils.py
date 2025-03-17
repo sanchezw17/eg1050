@@ -77,6 +77,43 @@ def reset_game(rocket, seed):
     rocket.angle = np.pi / 2
     rocket.thrust = 0
     rocket.fuel = max_fuel
+    rocket.score = 0
 
     seed[:] = np.random.randint(0, 250, 9)  # Generate new terrain
 
+import random
+
+# Asteroid setup
+asteroids = [pygame.Rect(random.randint(0, 750), random.randint(-600, -50), 50, 50) for _ in range(5)]
+asteroid_speed = 3
+
+# Load Images
+you_died_img = pygame.image.load("project/linked_files/png/you_died.jpeg")  
+asteroid_img = pygame.image.load("project/linked_files/png/asteroid.png")  
+
+def move_asteroids():
+    for asteroid in asteroids:
+        asteroid.y += asteroid_speed
+        if asteroid.y > 600:  # Reset asteroid to top when it leaves screen
+            asteroid.y = random.randint(-600, -50)
+            asteroid.x = random.randint(0, 750)
+
+def draw_asteroids(screen):
+    for asteroid in asteroids:
+        screen.blit(asteroid_img, (asteroid.x, asteroid.y))  
+
+def check_collision(player, screen):
+    for asteroid in asteroids:
+        if player.colliderect(asteroid):
+            engine_sound.stop()  # Stop the engine sound when the rocket explodes
+            you_died_img = pygame.image.load("project/linked_files/png/you_died.jpeg")  # Load the image
+            you_died_img = pygame.transform.scale(you_died_img, (WIDTH, HEIGHT))  # Scale to fullscreen
+            screen.blit(you_died_img, (0, 0))  # Draw image covering the screen
+
+            # Load and play the death sound
+            death_sound = pygame.mixer.Sound("project/linked_files/audio/death_sound.wav")  # Replace with the actual sound file path
+            death_sound.set_volume(1.0)
+            death_sound.play()
+
+            pygame.display.flip()  # Update the screen
+            pygame.time.delay(5500)
