@@ -1,5 +1,4 @@
 import numpy as np
-import physics_engine
 import pygame as pg
 
 class Base_object():
