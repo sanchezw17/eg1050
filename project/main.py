@@ -8,13 +8,6 @@ rocket = Rocket(25, HEIGHT - 180, 100, 50, "red", 1, 0, 0, 0, 0, np.pi / 2, 0, 1
 
 font = pygame.font.SysFont("Comic Sans", 30)  # Choose a font and size
 
-# Load coin image directly in main.py
-coin_img = pygame.image.load("project/linked_files/png/coin.png").convert_alpha()
-coin_img = pygame.transform.scale(coin_img, (30, 30))
-
-# Generating Coins More Coins Better desc
-coins, coins_img = generate_coins()
-
 run = True
 while run:
     timer.tick(fps)
@@ -27,7 +20,6 @@ while run:
     rocket.check_collision()
     rocket.update_speed()
     rocket.update_position()
-    rocket.print_info()
     rocket.update_fuel()
     blocks = make_environment(WIDTH, HEIGHT, seed)
     rocket.check_collision_blocks(blocks)
@@ -37,7 +29,7 @@ while run:
     screen.blit(score_text, (8, 70))  # Display at the top-left corner
 
     # Check for collisions with coins
-    rocket.check_collision_coins(coins)
+    rocket.check_coin_collision(coins)
 
     # Draw coins
     for coin_pos in coins:
