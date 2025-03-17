@@ -133,9 +133,21 @@ class Rocket:
                         show_you_win_screen()  # Show "You Win" screen
                         reset_game(self,seed,coins)  # Reset the game after winning
                 else:
-                    # Collision with terrain → explosion + reset
-                    show_explosion(self)
-                    reset_game(self,seed,coins)
+                    # Collision with terrain → handle shield logic
+                    if self.shield_strength > 0:
+                        self.shield_strength -= 1  # Reduce shield strength
+                        print(f"Shield hit! Remaining shields: {self.shield_strength}")
+
+                        # Bounce the rocket
+                        self.y_speed = -self.y_speed * 0.8  # Reverse direction and reduce speed
+                        self.y_pos = block.top - self.height  # Move rocket above the block
+
+                        return  # Exit after handling the first collision
+                    else:
+                        # No shield → explode immediately
+                        print("No shield left! Rocket explodes.")
+                        show_explosion(self)
+                        reset_game(self, seed)
                 return  # Exit after handling the first collision
 
     def check_coin_collision(self, coins):
