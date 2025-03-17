@@ -1,7 +1,7 @@
 import pygame
 import numpy as np
 from settings import screen, WIDTH, HEIGHT, GRAVITY, seed, max_fuel, fuel_consumption_rate
-from core.utils import show_you_win_screen, show_explosion, reset_game
+from core.utils import show_you_win_screen, show_explosion, reset_game, coins
 
 class Rocket:
     def __init__(self, x_pos, y_pos, height, width, color, mass, x_speed, y_speed, x_acceleration, y_acceleration, angle, thrust, fuel):
@@ -88,9 +88,6 @@ class Rocket:
             self.fuel = 0
             show_explosion(self)
             reset_game(self,seed)
-        
-    def print_info(self):
-        print(f"x_pos:{self.x_pos}, y_pos:{self.y_pos}, x_speed:{self.x_speed}, y_speed: {self.y_speed}, x_acceleration: {self.x_acceleration}, y_acceleration: {self.y_acceleration}, angle: {self.angle}, thrust: {self.thrust}")
 
     def check_collision(self):
         if self.x_pos < 0:
@@ -122,19 +119,22 @@ class Rocket:
                     # Check if it's the end pad (win condition)
                     if block == end_pad:
                         show_you_win_screen()  # Show "You Win" screen
-                        reset_game(self,seed)  # Reset the game after winning
+                        reset_game(self,seed,coins)  # Reset the game after winning
                 else:
                     # Collision with terrain → explosion + reset
                     show_explosion(self)
-                    reset_game(self,seed)
+                    reset_game(self,seed,coins)
                 return  # Exit after handling the first collision
 
-
-    def check_collision_coins(self, coins):
-        for coin in coins[:]:  # Iterate over a copy of the list to avoid modifying it while iterating
-            coin_rect = pygame.Rect(coin[0], coin[1], 30, 30)  # Assuming coin size is 30x30
+    def check_coin_collision(self, coins):
+        for coin_x, coin_y in coins:
+            coin_rect = pygame.Rect(coin_x, coin_y, 30, 30)  # Create coin's hitbox
             rocket_rect = pygame.Rect(self.x_pos, self.y_pos, self.width, self.height)  # Rocket's bounding box
-            if rocket_rect.colliderect(coin_rect):  # Check for collision
-                coins.remove(coin)  # Remove the coin
-                self.score += 1  # Increment the score
-                print(f"Coin collected! Score: {self.score}")  # Optional: Print score for debugging
+            if rocket_rect.colliderect(coin_rect):  # Check collision
+                coin_sound.play()  # Play sound when collected
+                coins.remove((coin_x, coin_y)) # Remove the coin
+                self.score += 1 # Increment the score
+            
+coin_sound = pygame.mixer.Sound("project/linked_files/audio/mario.mp3")
+
+

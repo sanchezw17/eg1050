@@ -1,5 +1,6 @@
 import pygame
 import numpy as np
+from core.environment import generate_coins
 from settings import screen, WIDTH, HEIGHT, background_image, engine_sound, max_fuel
 def show_you_win_screen():
     win_img = pygame.image.load("project/linked_files/png/Hell v2.jpg")
@@ -23,7 +24,7 @@ def show_you_died_screen():
     death_sound.play()
 
     pygame.display.flip()  # Update the screen
-    pygame.time.delay(5500)
+    pygame.time.delay(8000)
 
 def show_explosion(rocket):
     # Load explosion sound
@@ -66,7 +67,11 @@ def show_explosion(rocket):
     # After explosion animation, show "You Died" screen
     show_you_died_screen()
 
-def reset_game(rocket, seed):
+coin_img = pygame.image.load("project/linked_files/png/coin.png").convert_alpha()
+coin_img = pygame.transform.scale(coin_img, (30, 30))
+coins = generate_coins()
+
+def reset_game(rocket, seed, coins):
     # Reset rocket attributes
     rocket.x_pos = 25
     rocket.y_pos = HEIGHT - 180
@@ -80,6 +85,7 @@ def reset_game(rocket, seed):
     rocket.score = 0
 
     seed[:] = np.random.randint(0, 250, 9)  # Generate new terrain
+    coins[:] = generate_coins()
 
 import random
 

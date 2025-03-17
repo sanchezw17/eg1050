@@ -49,4 +49,4 @@ def generate_coins():
         coin_x = random.randint(50, WIDTH - 50)  # Avoid spawning too close to the edges
         coin_y = random.randint(50, 200)  # Spawn near the top of the screen
         coins.append((coin_x, coin_y))
-    return coins, coin_img
+    return coins
