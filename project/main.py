@@ -39,6 +39,12 @@ while run:
         if event.type == pygame.QUIT:
             run = False
 
+        # Handle key presses
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:  # Space bar pressed
+                show_explosion(rocket)  # Trigger the rocket explosion
+                reset_game(rocket, seed, coins)  # Reset the game after explosion
+                
         # Handle key releases (stop thrust when keys are released)
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_w:
