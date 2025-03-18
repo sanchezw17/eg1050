@@ -19,6 +19,7 @@ class Rocket:
         self.thrust = thrust
         self.fuel = max_fuel
         self.fuel = min(fuel, max_fuel)
+        self.is_falling = False
 
         self.image = pygame.image.load("project/linked_files/png/rocket-147466_960_720.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (width, height))
@@ -30,6 +31,13 @@ class Rocket:
         self.shield_strength = 1  # Shield activates for the first collision
         self.shield_image = pygame.image.load("project/linked_files/png/shield.png").convert_alpha()
         self.shield_image = pygame.transform.scale(self.shield_image, (width + 20, height + 20))  # Slightly larger than rocket
+        
+    def explode(self):
+        """
+        Causes the rocket to explode and resets the game.
+        """
+        show_explosion(self)  # Trigger the explosion animation
+        reset_game(self, seed, coins)  # Reset the game state
 
     def draw(self):
         # Rotate the rocket image
@@ -93,13 +101,27 @@ class Rocket:
         self.y_pos += self.y_speed
 
     def update_fuel(self):
-        if self.thrust > 0:
+        if self.thrust > 0 and self.fuel > 0:
             self.fuel -= fuel_consumption_rate
 
         if self.fuel < 0:
             self.fuel = 0
-            show_explosion(self)
-            reset_game(self,seed)
+            self.thrust = 0
+            self.is_falling = True
+
+        # Debugging output
+        print(f"Fuel: {self.fuel}, Thrust: {self.thrust}, Falling: {self.is_falling}")
+
+
+    def disable_thrust_if_no_fuel(self):
+        """
+        Disable thrust if fuel is zero and return True, otherwise return False.
+        """
+        if self.fuel <= 0:
+            self.thrust = 0  # Ensure thrust is zero
+            return True  # Indicate that thrust is disabled
+        return False  # Indicate that thrust is enabled
+    
 
     def check_collision(self):
         if self.x_pos < 0:
@@ -133,9 +155,15 @@ class Rocket:
                         show_you_win_screen()  # Show "You Win" screen
                         reset_game(self,seed,coins)  # Reset the game after winning
                 else:
+                # Collision with terrain
+                    if self.is_falling and abs(self.y_speed) < 5:  # Allow safe landing if falling slowly
+                        self.y_speed = 0
+                        self.y_pos = block.top - self.height  # Place rocket on top
+
+                    else:
                     # Collision with terrain → explosion + reset
-                    show_explosion(self)
-                    reset_game(self,seed,coins)
+                        show_explosion(self)
+                        reset_game(self,seed,coins)
                 return  # Exit after handling the first collision
 
     def check_coin_collision(self, coins):
