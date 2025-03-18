@@ -29,7 +29,6 @@ while run:
     rocket.check_collision()
     rocket.update_speed()
     rocket.update_position()
-    rocket.print_info()
     rocket.update_fuel()
     blocks = make_environment(WIDTH, HEIGHT, seed)
     rocket.check_collision_blocks(blocks)
@@ -39,7 +38,7 @@ while run:
     screen.blit(score_text, (8, 70))  # Display at the top-left corner
 
     # Check for collisions with coins
-    rocket.check_collision_coins(coins)
+    rocket.check_coin_collision(coins)
 
     # Draw coins
     for coin_pos in coins:
