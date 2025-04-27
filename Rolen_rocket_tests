@@ -1,7 +1,6 @@
 import pygame
 import numpy as np
 
-
 pygame.init()
 pygame.mixer.init()  # Initialize the mixer for sound
 
@@ -290,11 +289,6 @@ sun_image = pygame.transform.scale(sun_image, (200, 200))  # Scale the sun image
 engine_sound = pygame.mixer.Sound("engine_sound.mp3")  # Load engine sound
 engine_sound.set_volume(0.2)  # Adjust volume if needed
 
-# Fuel setup
-max_fuel = 100
-fuel = max_fuel # Start with max fuel
-fuel_consumption_rate = 0.1
-fuel_font = pygame.font.SysFont("Arial", 24)
 # Main Game loop
 run = True
 while run:
@@ -323,26 +317,6 @@ while run:
                 engine_sound.fadeout(250)
             if event.key == pygame.K_s:
                 rocket1.thrust = 0
-
-        # Check for reset when 'r' key is pressed
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_r:
-                reset_game()
-        
-        # Thrusting (reduce fuel when up key is pressed) 
-        if keys[pygame.K_UP]:
-            fuel -= fuel_consumption_rate
-            if fuel < 0:
-                fuel = 0 
-            else:
-                fuel = min(fuel, max_fuel)
-            # Draw fuel guage
-            pygame.draw.rect(screen, (0, 0, 0), (10, 10, 200, 20))
-            pygame.draw.rect(screen, (0, 255, 0), (10, 10, fuel * 2, 20))
-
-            # Display fuel level as text
-            fuel_test = fuel_font.render(f"Fuel: {int(fuel)}%", True, (255, 255, 255))
-            screen.blit(fuel_test, (10, 40))
 
     # Handle continuous key presses for rotation and thrust
     keys = pygame.key.get_pressed()
